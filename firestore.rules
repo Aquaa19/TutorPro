@@ -1,9 +1,16 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Restrict access so users can only read and write data in their own directory path
+    // Allow authenticated users to create and access their own data directory.
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+    // Allow public read access to the /ai_models collection
+    match /ai_models/{modelId} {
+      allow read: if true;
+      // Optional: Keep write restricted to admins/owners
+      allow write: if request.auth != null && 
+        (request.auth.uid == "admin-uid" || request.auth.uid == "owner-uid");
     }
   }
 }
