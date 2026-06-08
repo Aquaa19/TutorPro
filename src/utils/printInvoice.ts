@@ -293,11 +293,21 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
         
         <script>
           window.onload = function() {
+            const originalTitle = window.parent.document.title;
+            window.parent.document.title = "${student.name.replace(/\s+/g, '_')}_${payment.date}";
+            
             window.focus();
             window.print();
-            setTimeout(function() {
-              window.parent.document.body.removeChild(window.frameElement);
-            }, 1000);
+            
+            const cleanup = function() {
+              window.parent.document.title = originalTitle;
+              try {
+                window.parent.document.body.removeChild(window.frameElement);
+              } catch (e) {}
+            };
+            
+            window.onafterprint = cleanup;
+            setTimeout(cleanup, 1500); // Fallback backup
           };
         </script>
       </body>
