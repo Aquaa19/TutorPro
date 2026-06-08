@@ -137,11 +137,11 @@ export default function App() {
       if (loadedCount < 6) checkAllLoaded();
     });
 
-    const unsubProfile = onSnapshot(doc(db, 'users', currentUser.uid, 'profile', 'info'), (docSnap) => {
+    const unsubProfile = onSnapshot(doc(db, 'users', currentUser.uid, 'profile', 'info'), async (docSnap) => {
       if (docSnap.exists()) {
         setTutorProfile(docSnap.data() as TutorProfile);
       } else {
-        setTutorProfile({
+        const defaultProfile: TutorProfile = {
           name: currentUser.displayName || 'Arkadyuti Mandal',
           email: currentUser.email || '',
           phone: '',
@@ -149,7 +149,13 @@ export default function App() {
           defaultFee: 0,
           upiId: '',
           instituteName: ''
-        });
+        };
+        setTutorProfile(defaultProfile);
+        try {
+          await setDoc(doc(db, 'users', currentUser.uid, 'profile', 'info'), defaultProfile);
+        } catch (error) {
+          console.error("Error auto-seeding user profile to Firestore:", error);
+        }
       }
       if (loadedCount < 6) checkAllLoaded();
     });
