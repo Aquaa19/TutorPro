@@ -161,7 +161,7 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
           }
           .signature-area {
             text-align: center;
-            width: 220px;
+            width: 240px;
           }
           .signature-name {
             font-family: 'Ballet', cursive;
@@ -169,6 +169,7 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
             color: #0f172a;
             margin: 0;
             line-height: 1.1;
+            white-space: nowrap;
           }
           .signature-line {
             border-bottom: 1.5px dotted #94a3b8;
