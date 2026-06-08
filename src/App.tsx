@@ -496,6 +496,7 @@ export default function App() {
             batches={batches}
             attendance={attendance}
             payments={payments}
+            tutorProfile={tutorProfile}
             onNavigate={handleNavigate}
             onQuickLogPaymentOpen={() => handleNavigate('fees', { openLogModal: true })}
           />

@@ -1,12 +1,13 @@
 import React, { useMemo } from 'react';
 import { Calendar, Users, IndianRupee, AlertTriangle, ArrowRight, CheckCircle2, UserCheck, Plus, Sparkles } from 'lucide-react';
-import { Student, Batch, Attendance, Payment } from '../types';
+import { Student, Batch, Attendance, Payment, TutorProfile } from '../types';
 
 interface DashboardProps {
   students: Student[];
   batches: Batch[];
   attendance: Attendance[];
   payments: Payment[];
+  tutorProfile: TutorProfile;
   onNavigate: (screen: string, extraData?: any) => void;
   onQuickLogPaymentOpen: () => void;
 }
@@ -16,6 +17,7 @@ export default function Dashboard({
   batches,
   attendance,
   payments,
+  tutorProfile,
   onNavigate,
   onQuickLogPaymentOpen,
 }: DashboardProps) {
@@ -23,8 +25,8 @@ export default function Dashboard({
   // Get current weekday
   const todayDay = useMemo(() => {
     const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-    const d = new Date('2026-06-08T11:03:15Z'); // Keep in sync with system time
-    return days[d.getDay()]; // Day from system time is Mon, so "Monday"
+    const d = new Date();
+    return days[d.getDay()];
   }, []);
 
   // Filter batches scheduled for today
@@ -32,14 +34,28 @@ export default function Dashboard({
     return batches.filter(b => b.days.includes(todayDay));
   }, [batches, todayDay]);
 
+  const currentMonthLabel = useMemo(() => {
+    const options: Intl.DateTimeFormatOptions = { month: 'long', year: 'numeric' };
+    return new Date().toLocaleDateString('en-US', options); // e.g. "June 2026"
+  }, []);
+
+  const currentMonthName = useMemo(() => {
+    return new Date().toLocaleDateString('en-US', { month: 'long' });
+  }, []);
+
+  const formattedTodayDate = useMemo(() => {
+    const options: Intl.DateTimeFormatOptions = { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' };
+    return new Date().toLocaleDateString('en-US', options);
+  }, []);
+
   // Calculate statistics
   const stats = useMemo(() => {
     const activeStudents = students.filter(s => s.status === 'active');
     
-    // Fee calculations for current month (June 2026)
+    // Fee calculations for current month
     const expectedJuneRevenue = activeStudents.reduce((sum, s) => sum + s.monthlyFee, 0);
     const collectedJuneRevenue = payments
-      .filter(p => p.monthFor === 'June 2026' && p.status === 'paid')
+      .filter(p => p.monthFor === currentMonthLabel && p.status === 'paid')
       .reduce((sum, p) => sum + p.amountPaid, 0);
     const outstandingJuneRevenue = expectedJuneRevenue - collectedJuneRevenue;
 
@@ -54,9 +70,9 @@ export default function Dashboard({
       return { student: s, rate, count: studentAtt.length };
     }).filter(item => item.count > 0 && item.rate < 75);
 
-    // Overdue fees count: Active students who haven't paid June fees yet or previous month fees
+    // Overdue fees count: Active students who haven't paid current month fees yet
     const pendingStudents = activeStudents.filter(s => {
-      const hasJunePayment = payments.some(p => p.studentId === s.id && p.monthFor === 'June 2026' && p.status === 'paid');
+      const hasJunePayment = payments.some(p => p.studentId === s.id && p.monthFor === currentMonthLabel && p.status === 'paid');
       return !hasJunePayment;
     });
 
@@ -68,7 +84,9 @@ export default function Dashboard({
       lowAttendanceList,
       pendingStudents,
     };
-  }, [students, payments, attendance]);
+  }, [students, payments, attendance, currentMonthLabel]);
+
+  const firstName = tutorProfile.name ? tutorProfile.name.split(' ')[0] : 'Tutor';
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -83,10 +101,10 @@ export default function Dashboard({
             Tutor Pro OS · Activated
           </span>
           <h1 className="text-3xl md:text-5xl font-serif italic text-white tracking-tight">
-            Welcome Back, Prof. Rajesh
+            Welcome Back, {firstName}
           </h1>
           <p className="text-slate-400 text-sm font-sans">
-            Today is <strong className="text-gold font-medium">Monday, June 8, 2026</strong>. You have {todayBatches.length} batches scheduled for today. Ready for your lectures?
+            Today is <strong className="text-gold font-medium">{formattedTodayDate}</strong>. You have {todayBatches.length} batches scheduled for today. Ready for your lectures?
           </p>
         </div>
       </div>
@@ -106,7 +124,7 @@ export default function Dashboard({
 
         <div className="bg-dark-card border border-white/5 p-6 rounded-3xl flex items-center justify-between shadow-xl">
           <div>
-            <p className="text-[10px] opacity-40 uppercase tracking-widest mb-1">June Collections</p>
+            <p className="text-[10px] opacity-40 uppercase tracking-widest mb-1">{currentMonthName} Collections</p>
             <h3 className="text-2xl font-serif italic font-medium text-emerald-400">₹{stats.collectedJuneRevenue}</h3>
             <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">
               Outstanding: <strong className="text-white">₹{stats.outstandingJuneRevenue}</strong>
@@ -189,7 +207,7 @@ export default function Dashboard({
         <div className="lg:col-span-2 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-semibold uppercase tracking-widest text-[#d4af37]">Today's Schedule ({todayDay})</h3>
-            <span className="text-[10px] px-3 py-1 bg-white/5 rounded-full uppercase tracking-wider text-slate-400">{todayBatches.length} Sessions Remaining</span>
+            <span className="text-[10px] px-3 py-1 bg-white/5 rounded-full uppercase tracking-wider text-slate-400">{todayBatches.length} Sessions Scheduled</span>
           </div>
 
           <div className="space-y-4">
@@ -215,7 +233,7 @@ export default function Dashboard({
                         <span className="text-[10px] text-slate-500 font-mono">{b.timing}</span>
                       </div>
                       <h4 className="text-lg font-serif italic text-white leading-tight">
-                        {b.name} · <span className="text-xs font-sans not-italic text-gold opacity-80">Apex cohort</span>
+                        {b.name}
                       </h4>
                       <p className="text-xs text-slate-500 font-sans">
                         {batchStudents.length} Students enrolled in this batch roster
@@ -298,13 +316,13 @@ export default function Dashboard({
                   <span className="p-1 px-2 rounded bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[9px] font-mono font-bold tracking-widest">
                     DUE
                   </span>
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-white">Pending June Fees</h4>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-white">Pending {currentMonthName} Fees</h4>
                 </div>
                 <IndianRupee className="w-4 h-4 text-emerald-400 opacity-60" />
               </div>
 
               {stats.pendingStudents.length === 0 ? (
-                <p className="text-xs text-slate-500 leading-relaxed">All monthly fee collections are fully up to date for June 2026!</p>
+                <p className="text-xs text-slate-500 leading-relaxed">All monthly fee collections are fully up to date for {currentMonthLabel}!</p>
               ) : (
                 <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
                   {stats.pendingStudents.slice(0, 4).map(s => (
