@@ -24,6 +24,11 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Outfit:wght@300;400;600;700&display=swap');
           
+          @font-face {
+            font-family: 'Ballet';
+            src: url('/Ballet_48pt-Regular.ttf') format('truetype');
+          }
+          
           body {
             font-family: 'Outfit', sans-serif;
             color: #1e293b;
@@ -52,11 +57,12 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
           }
           .institute-info h1 {
             font-family: 'Cinzel', serif;
-            font-size: 26px;
+            font-size: 24px;
             color: #0f172a;
             margin: 0 0 6px 0;
             letter-spacing: 1px;
             font-weight: 700;
+            text-transform: uppercase;
           }
           .institute-info p {
             font-size: 13px;
@@ -155,16 +161,26 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
           }
           .signature-area {
             text-align: center;
-            width: 180px;
+            width: 220px;
+          }
+          .signature-name {
+            font-family: 'Ballet', cursive;
+            font-size: 34px;
+            color: #0f172a;
+            margin: 0;
+            line-height: 1.1;
           }
           .signature-line {
-            border-bottom: 1px dashed #94a3b8;
+            border-bottom: 1.5px dotted #94a3b8;
             margin-bottom: 8px;
-            height: 40px;
+            margin-top: -8px;
+            height: 10px;
           }
           .signature-title {
-            font-size: 12px;
+            font-size: 11px;
             color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 1px;
           }
           .watermark {
             position: absolute;
@@ -179,22 +195,30 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
             white-space: nowrap;
             pointer-events: none;
             user-select: none;
+            text-transform: uppercase;
           }
           .system-note {
             text-align: center;
             font-size: 10px;
             color: #94a3b8;
             margin-top: 30px;
+            line-height: 1.5;
+          }
+          .copyright-note {
+            font-size: 9px;
+            color: #cbd5e1;
+            margin-top: 6px;
+            letter-spacing: 0.5px;
           }
         </style>
       </head>
       <body>
         <div class="receipt-container">
-          <div class="watermark">${tutor.instituteName || 'ACADEMIC'}</div>
+          <div class="watermark">${tutor.instituteName || 'TutorPro'}</div>
           
           <div class="header">
             <div class="institute-info">
-              <h1>${tutor.instituteName || 'TUTORPRO INSTITUTE'}</h1>
+              <h1>${tutor.instituteName || 'TUTORPRO RECEIPT'}</h1>
               <p><strong>Educator:</strong> ${tutor.name}</p>
               ${tutor.phone ? `<p><strong>Phone:</strong> ${tutor.phone}</p>` : ''}
               ${tutor.email ? `<p><strong>Email:</strong> ${tutor.email}</p>` : ''}
@@ -254,13 +278,15 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
               <div class="payment-status-badge">PAID</div>
             </div>
             <div class="signature-area">
+              <div class="signature-name">${tutor.name || 'Arkadyuti Mandal'}</div>
               <div class="signature-line"></div>
               <div class="signature-title">Authorized Signature</div>
             </div>
           </div>
           
           <div class="system-note">
-            This is a computer-generated document and does not require a physical signature.
+            <div>This is a computer-generated document and does not require a physical signature.</div>
+            <div class="copyright-note">© 2026 TutorPro • AquaaX. All rights reserved.</div>
           </div>
         </div>
         
