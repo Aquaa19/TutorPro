@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  FolderLock, LayoutDashboard, Users, CalendarCheck2, CreditCard, Settings, Menu, X, Sparkles, GraduationCap
+  FolderLock, LayoutDashboard, Users, CalendarCheck2, CreditCard, Settings, Menu, X, Sparkles, GraduationCap, LogOut
 } from 'lucide-react';
 
 // Subcomponents
@@ -10,10 +10,18 @@ import StudentProfile from './components/StudentProfile';
 import AttendanceTracker from './components/AttendanceTracker';
 import FeeManagement from './components/FeeManagement';
 import SettingsScreen from './components/SettingsScreen';
+import LoginScreen from './components/LoginScreen';
 
 // Types and storage services
 import { Student, Batch, Attendance, Payment, Performance, TutorProfile } from './types';
 import { StorageService } from './utils/storage';
+
+// Firebase
+import { auth, db } from './utils/firebase';
+import { onAuthStateChanged, signOut } from 'firebase/auth';
+import { 
+  collection, doc, setDoc, deleteDoc, onSnapshot, writeBatch 
+} from 'firebase/firestore';
 
 interface NavState {
   screen: 'dashboard' | 'students' | 'student-profile' | 'attendance' | 'fees' | 'settings';
@@ -24,6 +32,11 @@ interface NavState {
 export default function App() {
   const [nav, setNav] = useState<NavState>({ screen: 'dashboard' });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Auth State
+  const [currentUser, setCurrentUser] = useState<any>(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [firestoreLoaded, setFirestoreLoaded] = useState(false);
 
   // Core database tables inside state
   const [students, setStudents] = useState<Student[]>([]);
@@ -38,145 +51,309 @@ export default function App() {
   // Hot Logger Payment Trigger modal shortcuts on fee page
   const [openFeesPageLogModal, setOpenFeesPageLogModal] = useState(false);
 
-  // Initialize storage upon mount
+  // Auth State Listener
   useEffect(() => {
-    StorageService.initialize();
-    loadAllData();
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const allowedEmail = import.meta.env.VITE_ALLOWED_EMAIL;
+        if (user.email === allowedEmail) {
+          setCurrentUser(user);
+        } else {
+          await signOut(auth);
+          setCurrentUser(null);
+        }
+      } else {
+        setCurrentUser(null);
+      }
+      setAuthLoading(false);
+    });
+    return () => unsubscribe();
   }, []);
 
-  const loadAllData = () => {
-    setStudents(StorageService.getStudents());
-    setBatches(StorageService.getBatches());
-    setAttendance(StorageService.getAttendance());
-    setPayments(StorageService.getPayments());
-    setPerformance(StorageService.getPerformance());
-    setTutorProfile(StorageService.getTutorProfile());
-  };
+  // Firestore Real-time Syncer
+  useEffect(() => {
+    if (!currentUser) {
+      setStudents([]);
+      setBatches([]);
+      setAttendance([]);
+      setPayments([]);
+      setPerformance([]);
+      setTutorProfile({
+        name: '', email: '', phone: '', subjects: [], defaultFee: 0, upiId: '', instituteName: ''
+      });
+      setFirestoreLoaded(false);
+      return;
+    }
 
-  // State mutations
-  const handleAddStudent = (newStudent: Omit<Student, 'id'>) => {
-    const studentWithId: Student = {
-      ...newStudent,
-      id: `s_${Date.now()}`
+    let loadedCount = 0;
+    const checkAllLoaded = () => {
+      loadedCount++;
+      if (loadedCount >= 6) {
+        setFirestoreLoaded(true);
+      }
     };
-    const updated = [...students, studentWithId];
-    setStudents(updated);
-    StorageService.saveStudents(updated);
+
+    const unsubStudents = onSnapshot(collection(db, 'users', currentUser.uid, 'students'), (snap) => {
+      const data = snap.docs.map(doc => doc.data() as Student);
+      setStudents(data);
+      if (loadedCount < 6) checkAllLoaded();
+    });
+
+    const unsubBatches = onSnapshot(collection(db, 'users', currentUser.uid, 'batches'), (snap) => {
+      const data = snap.docs.map(doc => doc.data() as Batch);
+      setBatches(data);
+      if (loadedCount < 6) checkAllLoaded();
+    });
+
+    const unsubAttendance = onSnapshot(collection(db, 'users', currentUser.uid, 'attendance'), (snap) => {
+      const data = snap.docs.map(doc => doc.data() as Attendance);
+      setAttendance(data);
+      if (loadedCount < 6) checkAllLoaded();
+    });
+
+    const unsubPayments = onSnapshot(collection(db, 'users', currentUser.uid, 'payments'), (snap) => {
+      const data = snap.docs.map(doc => doc.data() as Payment);
+      // Sort payments newest first
+      setPayments(data.sort((a, b) => b.id.localeCompare(a.id)));
+      if (loadedCount < 6) checkAllLoaded();
+    });
+
+    const unsubPerformance = onSnapshot(collection(db, 'users', currentUser.uid, 'performance'), (snap) => {
+      const data = snap.docs.map(doc => doc.data() as Performance);
+      setPerformance(data);
+      if (loadedCount < 6) checkAllLoaded();
+    });
+
+    const unsubProfile = onSnapshot(doc(db, 'users', currentUser.uid, 'profile', 'info'), (docSnap) => {
+      if (docSnap.exists()) {
+        setTutorProfile(docSnap.data() as TutorProfile);
+      } else {
+        setTutorProfile({
+          name: currentUser.displayName || 'Arkadyuti Mandal',
+          email: currentUser.email || '',
+          phone: '',
+          subjects: [],
+          defaultFee: 0,
+          upiId: '',
+          instituteName: ''
+        });
+      }
+      if (loadedCount < 6) checkAllLoaded();
+    });
+
+    return () => {
+      unsubStudents();
+      unsubBatches();
+      unsubAttendance();
+      unsubPayments();
+      unsubPerformance();
+      unsubProfile();
+    };
+  }, [currentUser]);
+
+  // Migration from LocalStorage (Seeds Firestore if empty on first login)
+  useEffect(() => {
+    if (!currentUser || !firestoreLoaded) return;
+
+    const migrateData = async () => {
+      if (students.length === 0) {
+        // Ensure local storage is initialized to verify if data exists
+        StorageService.initialize();
+        const localStudents = StorageService.getStudents();
+        if (localStudents.length > 0) {
+          console.log("Migrating local storage data to Firestore...");
+          const batch = writeBatch(db);
+
+          // Tutor Profile
+          const localTutor = StorageService.getTutorProfile();
+          if (!localTutor.name || localTutor.name === "Prof. Rajesh Kumar") {
+            localTutor.name = currentUser.displayName || "Arkadyuti Mandal";
+            localTutor.email = currentUser.email || "";
+          }
+          batch.set(doc(db, 'users', currentUser.uid, 'profile', 'info'), localTutor);
+
+          // Batches
+          const localBatches = StorageService.getBatches();
+          localBatches.forEach(b => {
+            batch.set(doc(db, 'users', currentUser.uid, 'batches', b.id), b);
+          });
+
+          // Students
+          localStudents.forEach(s => {
+            batch.set(doc(db, 'users', currentUser.uid, 'students', s.id), s);
+          });
+
+          // Attendance
+          const localAtt = StorageService.getAttendance();
+          localAtt.forEach(a => {
+            batch.set(doc(db, 'users', currentUser.uid, 'attendance', a.id), a);
+          });
+
+          // Payments
+          const localPayments = StorageService.getPayments();
+          localPayments.forEach(p => {
+            batch.set(doc(db, 'users', currentUser.uid, 'payments', p.id), p);
+          });
+
+          // Performance
+          const localPerf = StorageService.getPerformance();
+          localPerf.forEach(pf => {
+            batch.set(doc(db, 'users', currentUser.uid, 'performance', pf.id), pf);
+          });
+
+          await batch.commit();
+          console.log("Migration complete!");
+        }
+      }
+    };
+
+    migrateData();
+  }, [currentUser, firestoreLoaded]);
+
+  // State mutations (Firestore based)
+  const handleAddStudent = async (newStudent: Omit<Student, 'id'>) => {
+    if (!currentUser) return;
+    const id = `s_${Date.now()}`;
+    await setDoc(doc(db, 'users', currentUser.uid, 'students', id), {
+      ...newStudent,
+      id
+    });
   };
 
-  const handleDeleteStudent = (studentId: string) => {
-    // Purge records matching this student across all database tables
-    const nextStudents = students.filter(s => s.id !== studentId);
-    const nextAttendance = attendance.filter(a => a.studentId !== studentId);
-    const nextPayments = payments.filter(p => p.studentId !== studentId);
-    const nextPerf = performance.filter(p => p.studentId !== studentId);
+  const handleDeleteStudent = async (studentId: string) => {
+    if (!currentUser) return;
 
-    setStudents(nextStudents);
-    setAttendance(nextAttendance);
-    setPayments(nextPayments);
-    setPerformance(nextPerf);
+    // Delete student document
+    await deleteDoc(doc(db, 'users', currentUser.uid, 'students', studentId));
 
-    StorageService.saveStudents(nextStudents);
-    StorageService.saveAttendance(nextAttendance);
-    StorageService.savePayments(nextPayments);
-    StorageService.savePerformance(nextPerf);
+    // Purge records matching this student across all database tables in a batch
+    const batch = writeBatch(db);
+    attendance.filter(a => a.studentId === studentId).forEach(a => {
+      batch.delete(doc(db, 'users', currentUser.uid, 'attendance', a.id));
+    });
+    payments.filter(p => p.studentId === studentId).forEach(p => {
+      batch.delete(doc(db, 'users', currentUser.uid, 'payments', p.id));
+    });
+    performance.filter(p => p.studentId === studentId).forEach(p => {
+      batch.delete(doc(db, 'users', currentUser.uid, 'performance', p.id));
+    });
+    await batch.commit();
 
     if (nav.screen === 'student-profile' && nav.studentId === studentId) {
       setNav({ screen: 'students' });
     }
   };
 
-  const handleUpdateStudentStatus = (studentId: string, status: 'active' | 'inactive') => {
-    const updated = students.map(s => {
-      if (s.id === studentId) {
-        return { ...s, status };
-      }
-      return s;
-    });
-    setStudents(updated);
-    StorageService.saveStudents(updated);
+  const handleUpdateStudentStatus = async (studentId: string, status: 'active' | 'inactive') => {
+    if (!currentUser) return;
+    await setDoc(doc(db, 'users', currentUser.uid, 'students', studentId), {
+      status
+    }, { merge: true });
   };
 
-  const handleAddBatch = (newBatch: Omit<Batch, 'id'>) => {
-    const batchWithId: Batch = {
+  const handleAddBatch = async (newBatch: Omit<Batch, 'id'>) => {
+    if (!currentUser) return;
+    const id = `b_${Date.now()}`;
+    await setDoc(doc(db, 'users', currentUser.uid, 'batches', id), {
       ...newBatch,
-      id: `b_${Date.now()}`
-    };
-    const updated = [...batches, batchWithId];
-    setBatches(updated);
-    StorageService.saveBatches(updated);
+      id
+    });
   };
 
-  const handleSaveAttendance = (newAttendances: Omit<Attendance, 'id'>[]) => {
-    // Collect non-overlapping historical attendances
-    // Replace records matching date + studentId; append new ones
-    let nextAttendance = [...attendance];
-    
+  const handleSaveAttendance = async (newAttendances: Omit<Attendance, 'id'>[]) => {
+    if (!currentUser) return;
+    const batch = writeBatch(db);
+
     newAttendances.forEach(newAtt => {
-      // Check if entry exists on this date for this student
-      const matchIdx = nextAttendance.findIndex(
+      const existing = attendance.find(
         a => a.studentId === newAtt.studentId && a.date === newAtt.date
       );
-      
-      const hydratedAtt: Attendance = {
+      const id = existing ? existing.id : `att_${Date.now()}_${Math.random().toString(36).substring(2,6)}`;
+      batch.set(doc(db, 'users', currentUser.uid, 'attendance', id), {
         ...newAtt,
-        id: matchIdx !== -1 ? nextAttendance[matchIdx].id : `att_${Date.now()}_${Math.random().toString(36).substring(2,6)}`
-      };
-
-      if (matchIdx !== -1) {
-        nextAttendance[matchIdx] = hydratedAtt;
-      } else {
-        nextAttendance.push(hydratedAtt);
-      }
+        id
+      });
     });
 
-    setAttendance(nextAttendance);
-    StorageService.saveAttendance(nextAttendance);
+    await batch.commit();
   };
 
-  const handleRecordPayment = (newPayment: Omit<Payment, 'id'>) => {
-    const payWithId: Payment = {
+  const handleRecordPayment = async (newPayment: Omit<Payment, 'id'>) => {
+    if (!currentUser) return;
+    const id = `pay_${Date.now()}`;
+    await setDoc(doc(db, 'users', currentUser.uid, 'payments', id), {
       ...newPayment,
-      id: `pay_${Date.now()}`
-    };
-    const updated = [payWithId, ...payments]; // Append newest first
-    setPayments(updated);
-    StorageService.savePayments(updated);
+      id
+    });
   };
 
-  const handleAddPerformance = (newPerf: Omit<Performance, 'id'>) => {
-    const perfWithId: Performance = {
+  const handleAddPerformance = async (newPerf: Omit<Performance, 'id'>) => {
+    if (!currentUser) return;
+    const id = `perf_${Date.now()}`;
+    await setDoc(doc(db, 'users', currentUser.uid, 'performance', id), {
       ...newPerf,
-      id: `perf_${Date.now()}`
-    };
-    const updated = [...performance, perfWithId];
-    setPerformance(updated);
-    StorageService.savePerformance(updated);
+      id
+    });
   };
 
-  const handleUpdateTutorProfile = (newProfile: TutorProfile) => {
-    setTutorProfile(newProfile);
-    StorageService.saveTutorProfile(newProfile);
+  const handleUpdateTutorProfile = async (newProfile: TutorProfile) => {
+    if (!currentUser) return;
+    await setDoc(doc(db, 'users', currentUser.uid, 'profile', 'info'), newProfile);
   };
 
-  const handleImportBackup = (backupData: any): boolean => {
+  const handleImportBackup = async (backupData: any): Promise<boolean> => {
+    if (!currentUser) return false;
     try {
-      StorageService.importAll(backupData);
-      loadAllData();
+      const batch = writeBatch(db);
+
+      // Overwrite tutor profile
+      if (backupData.tutor) {
+        batch.set(doc(db, 'users', currentUser.uid, 'profile', 'info'), backupData.tutor);
+      }
+
+      // Seed all data collections
+      const collections = ['students', 'batches', 'attendance', 'payments', 'performance'];
+      collections.forEach(col => {
+        if (Array.isArray(backupData[col])) {
+          backupData[col].forEach((item: any) => {
+            batch.set(doc(db, 'users', currentUser.uid, col, item.id), item);
+          });
+        }
+      });
+
+      await batch.commit();
       return true;
-    } catch {
+    } catch (err) {
+      console.error(err);
       return false;
     }
   };
 
   const handleExportBackup = (): any => {
-    return StorageService.exportAll();
+    return {
+      tutor: tutorProfile,
+      batches,
+      students,
+      attendance,
+      payments,
+      performance,
+    };
   };
 
-  const handleClearEverything = () => {
-    localStorage.clear();
-    StorageService.initialize();
-    loadAllData();
+  const handleClearEverything = async () => {
+    if (!currentUser) return;
+    const confirmation = window.confirm("Are you absolutely sure you want to delete all your data from the cloud? This cannot be undone.");
+    if (!confirmation) return;
+
+    const batch = writeBatch(db);
+    students.forEach(s => batch.delete(doc(db, 'users', currentUser.uid, 'students', s.id)));
+    batches.forEach(b => batch.delete(doc(db, 'users', currentUser.uid, 'batches', b.id)));
+    attendance.forEach(a => batch.delete(doc(db, 'users', currentUser.uid, 'attendance', a.id)));
+    payments.forEach(p => batch.delete(doc(db, 'users', currentUser.uid, 'payments', p.id)));
+    performance.forEach(pf => batch.delete(doc(db, 'users', currentUser.uid, 'performance', pf.id)));
+    batch.delete(doc(db, 'users', currentUser.uid, 'profile', 'info'));
+
+    await batch.commit();
   };
 
   // Safe navigation transition
@@ -207,6 +384,21 @@ export default function App() {
       default: return 'Tutorly Hub';
     }
   }, [nav.screen]);
+
+  // Render auth loading spinner
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-dark-bg text-gold flex flex-col items-center justify-center font-sans">
+        <div className="w-10 h-10 border-4 border-gold border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="text-xs uppercase tracking-widest opacity-60">Initializing TutorPro.OS...</p>
+      </div>
+    );
+  }
+
+  // Overlay login screen if user is not authenticated
+  if (!currentUser) {
+    return <LoginScreen />;
+  }
 
   return (
     <div className="min-h-screen bg-dark-bg text-gray-200 font-sans flex flex-col md:flex-row antialiased">
@@ -266,8 +458,8 @@ export default function App() {
           </nav>
         </div>
 
-        {/* Bottom User status details */}
-        <div className="border-t border-white/5 pt-4">
+        {/* Bottom User status details and Sign Out */}
+        <div className="border-t border-white/5 pt-4 space-y-3">
           <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5">
             <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gold to-amber-500 flex items-center justify-center text-dark-bg font-bold italic text-xs shrink-0 select-none">
               {(tutorProfile.name?.[0] || 'A').toUpperCase()}
@@ -277,6 +469,13 @@ export default function App() {
               <p className="text-[9px] text-slate-500 uppercase tracking-tighter truncate">{tutorProfile.instituteName || 'Apex Workspace'}</p>
             </div>
           </div>
+          <button
+            onClick={() => signOut(auth)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold uppercase tracking-wider text-slate-400 hover:text-white hover:bg-red-500/10 hover:border-red-500/20 border border-transparent transition-all cursor-pointer"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+            <span>Sign Out</span>
+          </button>
         </div>
       </aside>
 

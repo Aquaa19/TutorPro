@@ -5,7 +5,7 @@ import { TutorProfile } from '../types';
 interface SettingsScreenProps {
   tutorProfile: TutorProfile;
   onUpdateProfile: (profile: TutorProfile) => void;
-  onImportBackup: (backupData: any) => boolean;
+  onImportBackup: (backupData: any) => Promise<boolean>;
   onExportBackup: () => any;
   onClearEverything: () => void;
 }
@@ -79,13 +79,13 @@ export default function SettingsScreen({
     
     if (!files || files.length === 0) return;
 
-    fileReader.onload = (event) => {
+    fileReader.onload = async (event) => {
       try {
         const parsed = JSON.parse(event.target?.result as string);
         
         // Basic schema validations checks
         if (parsed.tutor && parsed.batches && parsed.students && parsed.attendance && parsed.payments && parsed.performance) {
-          const success = onImportBackup(parsed);
+          const success = await onImportBackup(parsed);
           if (success) {
             setImportFeedback({ type: 'success', msg: 'Database backup synchronized successfully! Raging page contents.' });
             

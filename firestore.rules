@@ -1,0 +1,13 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper function to check if the user is authenticated and matches the whitelisted email
+    function isOwner() {
+      return request.auth != null && request.auth.token.email == 'arkamandal1919@gmail.com';
+    }
+
+    match /{document=**} {
+      allow read, write: if isOwner();
+    }
+  }
+}
