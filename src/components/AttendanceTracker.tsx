@@ -314,10 +314,10 @@ export default function AttendanceTracker({
                 {showSavedFeedback ? (
                   <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-semibold animate-pulse">
                     <CheckSquare className="w-4 h-4" />
-                    Roster successfully updated in local database.
+                    Roster successfully updated in cloud database.
                   </div>
                 ) : (
-                  <p className="text-xs text-slate-500 italic">Markings are stored instantly in standard LocalStorage.</p>
+                  <p className="text-xs text-slate-500 italic">Markings are saved securely to your Firestore database.</p>
                 )}
               </div>
               
