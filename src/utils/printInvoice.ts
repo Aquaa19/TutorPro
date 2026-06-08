@@ -66,7 +66,7 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
           }
           .institute-info p {
             font-size: 13px;
-            color: #64748b;
+            color: #334155;
             margin: 2px 0;
           }
           .receipt-title {
@@ -75,13 +75,13 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
           .receipt-title h2 {
             font-size: 28px;
             font-weight: 700;
-            color: #d4af37;
+            color: #aa7c11;
             margin: 0;
             letter-spacing: 2px;
           }
           .receipt-title p {
             font-size: 12px;
-            color: #64748b;
+            color: #475569;
             margin: 4px 0 0 0;
             font-family: monospace;
           }
@@ -95,7 +95,7 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 1.5px;
-            color: #94a3b8;
+            color: #475569;
             margin: 0 0 10px 0;
             border-bottom: 1px solid #f1f5f9;
             padding-bottom: 6px;
@@ -103,7 +103,7 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
           .details-block p {
             font-size: 14px;
             margin: 4px 0;
-            color: #334155;
+            color: #1e293b;
           }
           .details-block p strong {
             color: #0f172a;
@@ -120,7 +120,7 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: #64748b;
+            color: #334155;
             background: #f8fafc;
             padding: 12px 16px;
             border-bottom: 2px solid #e2e8f0;
@@ -179,7 +179,7 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
           }
           .signature-title {
             font-size: 11px;
-            color: #64748b;
+            color: #475569;
             text-transform: uppercase;
             letter-spacing: 1px;
           }
@@ -201,13 +201,13 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
           .system-note {
             text-align: center;
             font-size: 10px;
-            color: #94a3b8;
+            color: #475569;
             margin-top: 30px;
             line-height: 1.5;
           }
           .copyright-note {
             font-size: 9px;
-            color: #cbd5e1;
+            color: #64748b;
             margin-top: 6px;
             letter-spacing: 0.5px;
           }
