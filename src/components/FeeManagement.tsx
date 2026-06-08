@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
-import { IndianRupee, AlertTriangle, CheckCircle, Clock, Search, Filter, Share2, Plus, MessageCircle } from 'lucide-react';
+import { IndianRupee, AlertTriangle, CheckCircle, Clock, Search, Filter, Share2, Plus, MessageCircle, X, Printer } from 'lucide-react';
 import { Student, Batch, Payment, TutorProfile } from '../types';
+import { printInvoice } from '../utils/printInvoice';
 
 interface FeeManagementProps {
   students: Student[];
@@ -29,6 +30,25 @@ export default function FeeManagement({
   const [payAmount, setPayAmount] = useState('');
   const [payMode, setPayMode] = useState<'Cash' | 'UPI' | 'Bank Transfer'>('UPI');
   const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
+
+  // Bulk reminders state
+  const [isBulkPanelOpen, setIsBulkPanelOpen] = useState(false);
+  const [bulkQueue, setBulkQueue] = useState<Array<{ student: Student; daysLate: number; status: 'queued' | 'sent' | 'skipped'; checked: boolean }>>([]);
+  const [currentQueueIndex, setCurrentQueueIndex] = useState(0);
+
+  const handleOpenBulkReminders = () => {
+    const unpaidItems = studentsFeeStatusList
+      .filter(item => !item.isPaid)
+      .map(item => ({
+        student: item.student,
+        daysLate: item.daysLate,
+        status: 'queued' as const,
+        checked: true
+      }));
+    setBulkQueue(unpaidItems);
+    setCurrentQueueIndex(0);
+    setIsBulkPanelOpen(true);
+  };
 
   // Current statistics calculation
   const stats = useMemo(() => {
@@ -377,10 +397,21 @@ export default function FeeManagement({
 
       {/* Due list view cards */}
       <div className="space-y-4">
-        <h3 className="text-xs font-mono text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-          <Clock className="w-4 h-4 text-gold" />
-          Collections & Due Ledger ({selectedMonth})
-        </h3>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h3 className="text-xs font-mono text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <Clock className="w-4 h-4 text-gold" />
+            Collections & Due Ledger ({selectedMonth})
+          </h3>
+          {studentsFeeStatusList.some(item => !item.isPaid) && (
+            <button
+              onClick={handleOpenBulkReminders}
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 bg-rose-500/10 hover:bg-rose-600 border border-rose-500/20 text-rose-400 hover:text-white rounded-lg text-[10px] font-bold uppercase tracking-wider transition-all cursor-pointer shadow-[0_0_12px_rgba(239,68,68,0.08)] active:scale-95"
+            >
+              <MessageCircle className="w-3.5 h-3.5" />
+              Bulk Reminders Dispatcher
+            </button>
+          )}
+        </div>
 
         {studentsFeeStatusList.length === 0 ? (
           <div className="bg-dark-card border border-white/5 rounded-3xl p-12 text-center text-slate-550">
@@ -462,27 +493,41 @@ export default function FeeManagement({
                         </>
                       ) : (
                         item.payment && (
-                          <button
-                            onClick={() => {
-                              const text = `*TUITION FEE RECEIPT*\n` +
-                                `---------------------------\n` +
-                                `*Institute*: ${tutorProfile.instituteName}\n` +
-                                `*Tutor*: ${tutorProfile.name} (${tutorProfile.phone})\n` +
-                                `*Date*: ${item.payment?.date}\n` +
-                                `*Receipt ID*: #${item.payment?.id.slice(0, 8)}\n\n` +
-                                `Received from *${item.student.name}* a sum of *₹${item.payment?.amountPaid}* via *${item.payment?.mode}* of tuition fee for the month of *${selectedMonth}*.\n\n` +
-                                `Status: *PAID & COMPLETED*\n\n` +
-                                `Thank you!`;
-                              
-                              const formattedPhone = item.student.parentPhone.replace(/[^0-9+]/g, '');
-                              const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`;
-                              window.open(url, '_blank');
-                            }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-all cursor-pointer"
-                          >
-                            <Share2 className="w-3.5 h-3.5 text-gold" />
-                            Receipt WhatsApp
-                          </button>
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => {
+                                const text = `*TUITION FEE RECEIPT*\n` +
+                                  `---------------------------\n` +
+                                  `*Institute*: ${tutorProfile.instituteName}\n` +
+                                  `*Tutor*: ${tutorProfile.name} (${tutorProfile.phone})\n` +
+                                  `*Date*: ${item.payment?.date}\n` +
+                                  `*Receipt ID*: #${item.payment?.id.slice(0, 8)}\n\n` +
+                                  `Received from *${item.student.name}* a sum of *₹${item.payment?.amountPaid}* via *${item.payment?.mode}* of tuition fee for the month of *${selectedMonth}*.\n\n` +
+                                  `Status: *PAID & COMPLETED*\n\n` +
+                                  `Thank you!`;
+                                
+                                const formattedPhone = item.student.parentPhone.replace(/[^0-9+]/g, '');
+                                const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`;
+                                window.open(url, '_blank');
+                              }}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10 transition-all cursor-pointer"
+                            >
+                              <Share2 className="w-3.5 h-3.5 text-gold" />
+                              WhatsApp
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (item.payment) {
+                                  printInvoice(item.student, item.payment, tutorProfile);
+                                }
+                              }}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-wider bg-white/5 hover:bg-white/10 text-slate-350 border border-white/10 hover:bg-gold hover:text-dark-bg transition-all cursor-pointer"
+                              title="Download Invoice PDF / Print"
+                            >
+                              <Printer className="w-3.5 h-3.5" />
+                              Invoice PDF
+                            </button>
+                          </div>
                         )
                       )}
                     </div>
@@ -490,9 +535,199 @@ export default function FeeManagement({
                 </div>
               );
             })}
-          </div>
+      </div>
         )}
       </div>
+
+      {/* Bulk WhatsApp Reminder Queue Panel */}
+      {isBulkPanelOpen && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-[#121318] border border-white/10 rounded-3xl w-full max-w-2xl overflow-hidden shadow-2xl animate-scale-up">
+            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+              <div>
+                <h2 className="text-lg font-serif italic text-white flex items-center gap-2">
+                  <MessageCircle className="w-5 h-5 text-rose-400" />
+                  Bulk WhatsApp Reminders
+                </h2>
+                <p className="text-xs text-slate-400 mt-1">Queue up and dispatch overdue fee notifications sequentially.</p>
+              </div>
+              <button
+                onClick={() => setIsBulkPanelOpen(false)}
+                className="p-2 text-slate-400 hover:text-white rounded-lg hover:bg-white/5 transition-all cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-6">
+              {/* Queue Controls */}
+              {bulkQueue.length === 0 ? (
+                <div className="text-center py-8 text-slate-500 italic">
+                  No pending reminders in queue.
+                </div>
+              ) : (
+                <>
+                  {/* Progress Card */}
+                  <div className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4">
+                    <div className="flex items-center justify-between text-xs font-mono">
+                      <span className="text-slate-400">Queue Progress</span>
+                      <span className="text-white font-bold">
+                        {bulkQueue.filter(q => q.status !== 'queued').length} / {bulkQueue.filter(q => q.checked).length} processed
+                      </span>
+                    </div>
+                    {/* Progress Bar */}
+                    <div className="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                      <div
+                        className="bg-rose-500 h-full transition-all duration-300"
+                        style={{
+                          width: `${(bulkQueue.filter(q => q.status !== 'queued').length / Math.max(1, bulkQueue.filter(q => q.checked).length)) * 100}%`
+                        }}
+                      />
+                    </div>
+
+                    {/* Active Queue Action Box */}
+                    {(() => {
+                      // Find first checked & queued item
+                      const activeIndex = bulkQueue.findIndex((q, idx) => q.checked && q.status === 'queued' && idx >= currentQueueIndex);
+                      if (activeIndex === -1) {
+                        return (
+                          <div className="text-center py-4 space-y-2">
+                            <p className="text-xs text-emerald-450 font-semibold flex items-center justify-center gap-1.5">
+                              <CheckCircle className="w-4 h-4" /> All queued reminders processed!
+                            </p>
+                            <button
+                              onClick={() => {
+                                setBulkQueue(prev => prev.map(q => ({ ...q, status: 'queued' })));
+                                setCurrentQueueIndex(0);
+                              }}
+                              className="text-[10px] font-bold uppercase tracking-widest text-gold hover:underline cursor-pointer"
+                            >
+                              Restart Queue
+                            </button>
+                          </div>
+                        );
+                      }
+
+                      const activeItem = bulkQueue[activeIndex];
+                      return (
+                        <div className="bg-[#0b0c10] p-4 rounded-xl border border-white/5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <span className="inline-block text-[8px] font-mono bg-rose-500/10 text-rose-400 border border-rose-500/10 px-2 py-0.5 rounded uppercase font-bold tracking-wider">
+                              Next in Queue
+                            </span>
+                            <h4 className="text-sm font-semibold text-white mt-1.5 truncate">{activeItem.student.name}</h4>
+                            <p className="text-xs text-slate-400 mt-0.5 truncate">
+                              Class: {activeItem.student.grade} • Fee: ₹{activeItem.student.monthlyFee} • Overdue: {activeItem.daysLate} days
+                            </p>
+                          </div>
+                          
+                          <div className="flex items-center gap-2 shrink-0">
+                            <button
+                              onClick={() => {
+                                // Skip active item
+                                setBulkQueue(prev => prev.map((q, idx) => idx === activeIndex ? { ...q, status: 'skipped' } : q));
+                                setCurrentQueueIndex(activeIndex + 1);
+                              }}
+                              className="px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 text-slate-400 text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all"
+                            >
+                              Skip
+                            </button>
+                            <button
+                              onClick={() => {
+                                // Launch WhatsApp
+                                triggerOverdueWhatsApp(activeItem.student, activeItem.daysLate);
+                                setBulkQueue(prev => prev.map((q, idx) => idx === activeIndex ? { ...q, status: 'sent' } : q));
+                                setCurrentQueueIndex(activeIndex + 1);
+                              }}
+                              className="px-4 py-1.5 rounded bg-rose-600 hover:bg-rose-500 text-white text-[10px] font-bold uppercase tracking-wider cursor-pointer transition-all flex items-center gap-1.5"
+                            >
+                              <MessageCircle className="w-3.5 h-3.5" />
+                              Send WhatsApp
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })()}
+                  </div>
+
+                  {/* Queue Table */}
+                  <div className="max-h-60 overflow-y-auto border border-white/5 rounded-2xl bg-white/[0.01]">
+                    <table className="w-full text-left text-xs font-sans">
+                      <thead className="bg-white/5 text-slate-400 font-mono text-[9px] uppercase tracking-wider sticky top-0">
+                        <tr>
+                          <th className="px-4 py-3 text-center w-12 bg-[#121318]">
+                            <input
+                              type="checkbox"
+                              checked={bulkQueue.every(q => q.checked)}
+                              onChange={(e) => {
+                                const checked = e.target.checked;
+                                setBulkQueue(prev => prev.map(q => ({ ...q, checked })));
+                              }}
+                              className="rounded bg-black border-white/10 text-rose-500 focus:ring-rose-500"
+                            />
+                          </th>
+                          <th className="px-4 py-3 bg-[#121318]">Student</th>
+                          <th className="px-4 py-3 bg-[#121318]">Class</th>
+                          <th className="px-4 py-3 bg-[#121318]">Amount Due</th>
+                          <th className="px-4 py-3 bg-[#121318]">Parent Phone</th>
+                          <th className="px-4 py-3 text-right bg-[#121318]">Queue Status</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {bulkQueue.map((item, idx) => (
+                          <tr key={item.student.id} className="hover:bg-white/[0.02]">
+                            <td className="px-4 py-3 text-center">
+                              <input
+                                type="checkbox"
+                                checked={item.checked}
+                                onChange={(e) => {
+                                  const checked = e.target.checked;
+                                  setBulkQueue(prev => prev.map((q, i) => i === idx ? { ...q, checked } : q));
+                                }}
+                                className="rounded bg-black border-white/10 text-rose-500 focus:ring-rose-500"
+                              />
+                            </td>
+                            <td className="px-4 py-3 font-semibold text-white">{item.student.name}</td>
+                            <td className="px-4 py-3 text-slate-400">{item.student.grade}</td>
+                            <td className="px-4 py-3 font-mono text-gold">₹{item.student.monthlyFee}</td>
+                            <td className="px-4 py-3 text-slate-450 font-mono">{item.student.parentPhone}</td>
+                            <td className="px-4 py-3 text-right">
+                              {item.status === 'queued' && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-white/5 text-slate-400 border border-white/5 uppercase">
+                                  Queued
+                                </span>
+                              )}
+                              {item.status === 'sent' && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 uppercase">
+                                  ✓ Sent
+                                </span>
+                              )}
+                              {item.status === 'skipped' && (
+                                <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[8px] font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 uppercase">
+                                  Skipped
+                                </span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <div className="p-6 bg-white/[0.02] border-t border-white/5 flex justify-end gap-2">
+              <button
+                onClick={() => setIsBulkPanelOpen(false)}
+                className="px-4 py-2 bg-white/5 border border-white/5 hover:bg-white/10 rounded-lg text-slate-400 text-xs font-semibold hover:text-white transition-all cursor-pointer"
+              >
+                Close Dispatcher
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

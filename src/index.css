@@ -211,3 +211,27 @@
   color: #ffffff !important;
 }
 
+/* Custom App Themed Scrollbar */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(212, 175, 55, 0.25) var(--app-bg);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--app-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 55, 0.25);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(212, 175, 55, 0.45);
+}
+

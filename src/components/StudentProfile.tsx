@@ -3,6 +3,7 @@ import {
   ArrowLeft, Phone, Calendar, IndianRupee, BarChart3, TrendingUp, Award, Clock, Plus, BookOpen, Share2, Printer, CheckCircle2, AlertCircle
 } from 'lucide-react';
 import { Student, Batch, Attendance, Payment, Performance, TutorProfile } from '../types';
+import { printInvoice } from '../utils/printInvoice';
 
 interface StudentProfileProps {
   studentId: string;
@@ -784,24 +785,34 @@ export default function StudentProfile({
                           </span>
                         </td>
                         <td className="px-5 py-3.5 text-right">
-                          <button
-                            onClick={() => {
-                              const text = `*TUITION FEE RECEIPT*\n` +
-                                `---------------------------\n` +
-                                `*Institute*: ${tutorProfile.instituteName}\n` +
-                                `*Tutor*: ${tutorProfile.name} (${tutorProfile.phone})\n` +
-                                `*Date*: ${p.date}\n` +
-                                `*Receipt ID*: #${p.id.slice(0, 8)}\n\n` +
-                                `Received with thanks from *${student.name}* a sum of *₹${p.amountPaid}* via *${p.mode}* of tuition fee for the month of *${p.monthFor}*.\n\n` +
-                                `Status: *PAID & CLOSED*\n\n` +
-                                `Thank you!`;
-                              sendWhatsAppUpdate(text);
-                            }}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold bg-indigo-600/15 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600 hover:text-white rounded transition-colors cursor-pointer"
-                          >
-                            <Share2 className="w-3 h-3" />
-                            Share Receipt
-                          </button>
+                          <div className="flex justify-end gap-2">
+                            <button
+                              onClick={() => {
+                                const text = `*TUITION FEE RECEIPT*\n` +
+                                  `---------------------------\n` +
+                                  `*Institute*: ${tutorProfile.instituteName}\n` +
+                                  `*Tutor*: ${tutorProfile.name} (${tutorProfile.phone})\n` +
+                                  `*Date*: ${p.date}\n` +
+                                  `*Receipt ID*: #${p.id.slice(0, 8)}\n\n` +
+                                  `Received with thanks from *${student.name}* a sum of *₹${p.amountPaid}* via *${p.mode}* of tuition fee for the month of *${p.monthFor}*.\n\n` +
+                                  `Status: *PAID & CLOSED*\n\n` +
+                                  `Thank you!`;
+                                sendWhatsAppUpdate(text);
+                              }}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold bg-indigo-600/15 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600 hover:text-white rounded transition-colors cursor-pointer"
+                            >
+                              <Share2 className="w-3 h-3" />
+                              Share Receipt
+                            </button>
+                            <button
+                              onClick={() => printInvoice(student, p, tutorProfile)}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-[10px] font-semibold bg-white/5 text-slate-350 border border-white/10 hover:bg-gold hover:text-dark-bg rounded transition-all cursor-pointer"
+                              title="Download PDF / Print Receipt"
+                            >
+                              <Printer className="w-3 h-3" />
+                              PDF Receipt
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     ))

@@ -430,8 +430,8 @@ export default function Dashboard({
               {stats.pendingStudents.length === 0 ? (
                 <p className="text-xs text-slate-500 leading-relaxed">All monthly fee collections are fully up to date for {currentMonthLabel}!</p>
               ) : (
-                <div className="space-y-3 max-h-48 overflow-y-auto pr-1">
-                  {stats.pendingStudents.slice(0, 4).map(s => (
+                <div className="space-y-3 max-h-[280px] overflow-y-auto pr-1">
+                  {stats.pendingStudents.slice(0, 6).map(s => (
                     <div
                       key={s.id}
                       onClick={() => onNavigate('student-profile', { studentId: s.id, tabIndex: 2 })} // Ledger tab
@@ -449,12 +449,12 @@ export default function Dashboard({
                       </div>
                     </div>
                   ))}
-                  {stats.pendingStudents.length > 4 && (
+                  {stats.pendingStudents.length > 6 && (
                     <button
                       onClick={() => onNavigate('fees')}
                       className="w-full text-center text-gold hover:text-gold-light text-[10px] font-bold uppercase tracking-widest pt-2 border-t border-white/5 transition-all"
                     >
-                      + {stats.pendingStudents.length - 4} more pending. Action due.
+                      + {stats.pendingStudents.length - 6} more pending. Action due.
                     </button>
                   )}
                 </div>
