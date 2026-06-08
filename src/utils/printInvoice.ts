@@ -20,7 +20,7 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
     <!DOCTYPE html>
     <html>
       <head>
-        <title>Receipt_${receiptId}</title>
+        <title>${student.name.replace(/\s+/g, '_')}_${payment.date}</title>
         <style>
           @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Outfit:wght@300;400;600;700&display=swap');
           
