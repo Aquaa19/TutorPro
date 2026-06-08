@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { Calendar, CheckSquare, Users, Sparkles, MessageCircle, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Calendar, CheckSquare, Users, Sparkles, MessageCircle, AlertTriangle, CheckCircle, Lock, Unlock } from 'lucide-react';
 import { Student, Batch, Attendance } from '../types';
 
 interface AttendanceTrackerProps {
@@ -21,6 +21,30 @@ export default function AttendanceTracker({
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
   const [markedRecords, setMarkedRecords] = useState<Record<string, 'present' | 'absent' | 'late'>>({});
   const [showSavedFeedback, setShowSavedFeedback] = useState(false);
+  const [unlockedOverrides, setUnlockedOverrides] = useState<Record<string, boolean>>({});
+
+  // Find students belonging to current batch and are active
+  const activeStudents = useMemo(() => {
+    if (!selectedBatchId) return [];
+    return students.filter(s => s.batchId === selectedBatchId && s.status === 'active');
+  }, [students, selectedBatchId]);
+
+  const alreadyMarkedStudentIds = useMemo(() => {
+    if (!selectedBatchId || !selectedDate) return new Set<string>();
+    const matched = new Set<string>();
+    activeStudents.forEach(s => {
+      const match = attendance.find(a => a.studentId === s.id && a.date === selectedDate);
+      if (match) {
+        matched.add(s.id);
+      }
+    });
+    return matched;
+  }, [selectedBatchId, selectedDate, activeStudents, attendance]);
+
+  // Reset unlocked states when date or batch changes
+  useEffect(() => {
+    setUnlockedOverrides({});
+  }, [selectedDate, selectedBatchId]);
 
   // Set default batch selection if passed down from Dashboard
   useEffect(() => {
@@ -30,12 +54,6 @@ export default function AttendanceTracker({
       setSelectedBatchId(batches[0].id);
     }
   }, [preselectedBatchId, batches]);
-
-  // Find students belonging to current batch and are active
-  const activeStudents = useMemo(() => {
-    if (!selectedBatchId) return [];
-    return students.filter(s => s.batchId === selectedBatchId && s.status === 'active');
-  }, [students, selectedBatchId]);
 
   // Read existing attendance records for the batch/date combination to edit or check
   useEffect(() => {
@@ -197,10 +215,41 @@ export default function AttendanceTracker({
 
                     {/* Checkbox state selectors */}
                     <div className="flex flex-wrap items-center gap-2">
+                      {alreadyMarkedStudentIds.has(student.id) && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setUnlockedOverrides(prev => ({
+                              ...prev,
+                              [student.id]: !prev[student.id]
+                            }));
+                          }}
+                          className={`p-1.5 px-2.5 rounded-lg border text-[9px] font-mono font-bold uppercase tracking-wider transition-all flex items-center gap-1 cursor-pointer select-none ${
+                            (alreadyMarkedStudentIds.has(student.id) && !unlockedOverrides[student.id])
+                              ? 'bg-amber-500/10 border-amber-500/20 text-amber-500 hover:bg-amber-500/20' 
+                              : 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400 hover:bg-emerald-500/20'
+                          }`}
+                          title={(alreadyMarkedStudentIds.has(student.id) && !unlockedOverrides[student.id]) ? "Unlock to make changes" : "Lock row"}
+                        >
+                          {(alreadyMarkedStudentIds.has(student.id) && !unlockedOverrides[student.id]) ? (
+                            <>
+                              <Lock className="w-3 h-3" />
+                              Locked
+                            </>
+                          ) : (
+                            <>
+                              <Unlock className="w-3 h-3" />
+                              Unlocked
+                            </>
+                          )}
+                        </button>
+                      )}
+
                       <div className="flex bg-white/5 p-1 rounded-xl border border-white/5">
                         <button
                           onClick={() => handleToggleStatus(student.id, 'present')}
-                          className={`px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wider uppercase cursor-pointer transition-all ${
+                          disabled={alreadyMarkedStudentIds.has(student.id) && !unlockedOverrides[student.id]}
+                          className={`px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wider uppercase cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
                             currentStatus === 'present'
                               ? 'bg-emerald-550/15 text-emerald-400 shadow-sm border border-emerald-500/20'
                               : 'text-slate-400 hover:text-white border border-transparent'
@@ -210,7 +259,8 @@ export default function AttendanceTracker({
                         </button>
                         <button
                           onClick={() => handleToggleStatus(student.id, 'late')}
-                          className={`px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wider uppercase cursor-pointer transition-all ${
+                          disabled={alreadyMarkedStudentIds.has(student.id) && !unlockedOverrides[student.id]}
+                          className={`px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wider uppercase cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
                             currentStatus === 'late'
                               ? 'bg-amber-500/15 text-amber-500 shadow-sm border border-amber-500/20'
                               : 'text-slate-400 hover:text-white border border-transparent'
@@ -220,7 +270,8 @@ export default function AttendanceTracker({
                         </button>
                         <button
                           onClick={() => handleToggleStatus(student.id, 'absent')}
-                          className={`px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wider uppercase cursor-pointer transition-all ${
+                          disabled={alreadyMarkedStudentIds.has(student.id) && !unlockedOverrides[student.id]}
+                          className={`px-3 py-1.5 rounded-lg text-[10px] font-mono font-bold tracking-wider uppercase cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed transition-all ${
                             currentStatus === 'absent'
                               ? 'bg-rose-500/15 text-rose-450 shadow-sm border border-rose-500/20'
                               : 'text-slate-400 hover:text-white border border-transparent'

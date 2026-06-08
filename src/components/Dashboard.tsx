@@ -71,9 +71,13 @@ export default function Dashboard({
     }).filter(item => item.count > 0 && item.rate < 75);
 
     // Overdue fees count: Active students who haven't paid current month fees yet
+    // and whose custom billing start day has already passed
+    const todayDom = new Date().getDate();
     const pendingStudents = activeStudents.filter(s => {
+      const billingDay = s.billingDay || 1;
+      const isPastBillingDay = todayDom >= billingDay;
       const hasJunePayment = payments.some(p => p.studentId === s.id && p.monthFor === currentMonthLabel && p.status === 'paid');
-      return !hasJunePayment;
+      return isPastBillingDay && !hasJunePayment;
     });
 
     return {
@@ -85,6 +89,10 @@ export default function Dashboard({
       pendingStudents,
     };
   }, [students, payments, attendance, currentMonthLabel]);
+
+  const recentPayments = useMemo(() => {
+    return payments.slice(0, 3);
+  }, [payments]);
 
   const firstName = tutorProfile.name ? tutorProfile.name.split(' ')[0] : 'Tutor';
 
@@ -203,63 +211,161 @@ export default function Dashboard({
 
       {/* Middle Grid - Today's Schedule & Action Items */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Today's Schedule (Cron List) */}
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-semibold uppercase tracking-widest text-[#d4af37]">Today's Schedule ({todayDay})</h3>
-            <span className="text-[10px] px-3 py-1 bg-white/5 rounded-full uppercase tracking-wider text-slate-400">{todayBatches.length} Sessions Scheduled</span>
+        {/* Today's Schedule (Cron List) & Summary Directory Docks */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-semibold uppercase tracking-widest text-[#d4af37]">Today's Schedule ({todayDay})</h3>
+              <span className="text-[10px] px-3 py-1 bg-white/5 rounded-full uppercase tracking-wider text-slate-400">{todayBatches.length} Sessions Scheduled</span>
+            </div>
+
+            <div className="space-y-4">
+              {todayBatches.length === 0 ? (
+                <div className="bg-dark-card border border-white/5 rounded-3xl p-8 text-center text-slate-450">
+                  <Calendar className="w-10 h-10 mx-auto text-slate-600 mb-2" />
+                  <p className="font-serif italic text-white text-base">No Sessions for Today</p>
+                  <p className="text-xs text-slate-500 mt-1">Enjoy your free day or adjust settings in the master control panel.</p>
+                </div>
+              ) : (
+                todayBatches.map(b => {
+                  const batchStudents = students.filter(s => s.batchId === b.id && s.status === 'active');
+                  return (
+                    <div
+                      key={b.id}
+                      className="group bg-dark-card hover:bg-white/[0.03] border border-white/5 hover:border-white/10 p-5 rounded-2xl shadow-lg transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
+                    >
+                      <div className="space-y-1.5 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-gold/15 text-gold border border-gold/10">
+                            {b.subject}
+                          </span>
+                          <span className="text-[10px] text-slate-500 font-mono">
+                            {b.dayTimings?.find(dt => dt.day === todayDay)?.timing || b.timing}
+                          </span>
+                        </div>
+                        <h4 className="text-lg font-serif italic text-white leading-tight">
+                          {b.name}
+                        </h4>
+                        <p className="text-xs text-slate-500 font-sans">
+                          {batchStudents.length} Students enrolled in this batch roster
+                        </p>
+                      </div>
+                      
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={() => onNavigate('attendance', { preselectedBatchId: b.id })}
+                          className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gold text-dark-bg cursor-pointer hover:bg-gold-light text-[10px] font-bold uppercase tracking-widest rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.15)] transition-all active:scale-95"
+                        >
+                          <UserCheck className="w-3.5 h-3.5" />
+                          Mark Attendance
+                        </button>
+                        <button
+                          onClick={() => onNavigate('students', { batchId: b.id })}
+                          className="p-2.5 rounded-lg border border-white/5 bg-white/5 text-slate-305 hover:text-white hover:bg-white/10 cursor-pointer transition-all"
+                          title="View Group"
+                        >
+                          <ArrowRight className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
 
-          <div className="space-y-4">
-            {todayBatches.length === 0 ? (
-              <div className="bg-dark-card border border-white/5 rounded-3xl p-8 text-center text-slate-450">
-                <Calendar className="w-10 h-10 mx-auto text-slate-600 mb-2" />
-                <p className="font-serif italic text-white text-base">No Sessions for Today</p>
-                <p className="text-xs text-slate-500 mt-1">Enjoy your free day or adjust settings in the master control panel.</p>
+          {/* Quick Overview Widgets */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Recent Payments Widget */}
+            <div className="bg-dark-card border border-white/5 rounded-3xl p-6 shadow-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-mono uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                  <IndianRupee className="w-4 h-4 text-emerald-400" />
+                  Recent Transactions
+                </h3>
+                <button
+                  onClick={() => onNavigate('fees')}
+                  className="text-[9px] font-bold uppercase tracking-wider text-gold hover:underline cursor-pointer"
+                >
+                  View All
+                </button>
               </div>
-            ) : (
-              todayBatches.map(b => {
-                const batchStudents = students.filter(s => s.batchId === b.id && s.status === 'active');
-                return (
-                  <div
-                    key={b.id}
-                    className="group bg-dark-card hover:bg-white/[0.03] border border-white/5 hover:border-white/10 p-5 rounded-2xl shadow-lg transition-all flex flex-col md:flex-row md:items-center justify-between gap-4"
-                  >
-                    <div className="space-y-1.5 flex-1">
-                      <div className="flex items-center gap-2">
-                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider bg-gold/15 text-gold border border-gold/10">
-                          {b.subject}
-                        </span>
-                        <span className="text-[10px] text-slate-500 font-mono">{b.timing}</span>
+              <div className="space-y-3">
+                {recentPayments.length === 0 ? (
+                  <p className="text-xs text-slate-500 italic py-4 text-center">No recent payments logged.</p>
+                ) : (
+                  recentPayments.map(p => {
+                    const student = students.find(s => s.id === p.studentId);
+                    return (
+                      <div
+                        key={p.id}
+                        onClick={() => onNavigate('student-profile', { studentId: p.studentId, tabIndex: 2 })}
+                        className="flex items-center justify-between p-3 rounded-xl bg-white/[0.01] hover:bg-white/[0.04] border border-white/5 hover:border-white/10 cursor-pointer transition-all"
+                      >
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-bold text-white truncate">{student?.name || 'Unknown'}</p>
+                          <p className="text-[9px] text-slate-500 truncate mt-0.5">{p.monthFor} • {p.date}</p>
+                        </div>
+                        <div className="text-right ml-3 shrink-0">
+                          <span className="text-xs font-bold text-emerald-400 font-mono">
+                            +₹{p.amountPaid}
+                          </span>
+                          <span className="block text-[8px] text-slate-500 uppercase tracking-wide">{p.mode}</span>
+                        </div>
                       </div>
-                      <h4 className="text-lg font-serif italic text-white leading-tight">
-                        {b.name}
-                      </h4>
-                      <p className="text-xs text-slate-500 font-sans">
-                        {batchStudents.length} Students enrolled in this batch roster
-                      </p>
-                    </div>
-                    
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={() => onNavigate('attendance', { preselectedBatchId: b.id })}
-                        className="flex-1 md:flex-none inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-gold text-dark-bg cursor-pointer hover:bg-gold-light text-[10px] font-bold uppercase tracking-widest rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.15)] transition-all active:scale-95"
-                      >
-                        <UserCheck className="w-3.5 h-3.5" />
-                        Mark Attendance
-                      </button>
-                      <button
+                    );
+                  })
+                )}
+              </div>
+            </div>
+
+            {/* Active Batches Directory Widget */}
+            <div className="bg-dark-card border border-white/5 rounded-3xl p-6 shadow-xl space-y-4">
+              <div className="flex items-center justify-between">
+                <h3 className="text-xs font-mono uppercase tracking-widest text-slate-400 flex items-center gap-2">
+                  <Users className="w-4 h-4 text-gold" />
+                  Weekly Cohorts
+                </h3>
+                <button
+                  onClick={() => onNavigate('students')}
+                  className="text-[9px] font-bold uppercase tracking-wider text-gold hover:underline cursor-pointer"
+                >
+                  Manage
+                </button>
+              </div>
+              <div className="space-y-3">
+                {batches.length === 0 ? (
+                  <p className="text-xs text-slate-500 italic py-4 text-center">No batches created yet.</p>
+                ) : (
+                  batches.slice(0, 3).map(b => {
+                    const count = students.filter(s => s.batchId === b.id && s.status === 'active').length;
+                    return (
+                      <div
+                        key={b.id}
                         onClick={() => onNavigate('students', { batchId: b.id })}
-                        className="p-2.5 rounded-lg border border-white/5 bg-white/5 text-slate-305 hover:text-white hover:bg-white/10 cursor-pointer transition-all"
-                        title="View Group"
+                        className="flex items-center justify-between p-3 rounded-xl bg-white/[0.01] hover:bg-white/[0.04] border border-white/5 hover:border-white/10 cursor-pointer transition-all"
                       >
-                        <ArrowRight className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })
-            )}
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <p className="text-xs font-bold text-white truncate">{b.name}</p>
+                            <span className="px-1.5 py-0.5 rounded text-[8px] font-bold bg-gold/10 text-gold border border-gold/10 uppercase tracking-wider shrink-0">
+                              {b.subject}
+                            </span>
+                          </div>
+                          <p className="text-[9px] text-slate-500 truncate mt-0.5">
+                            {b.days.join(', ')} • {b.timing}
+                          </p>
+                        </div>
+                        <div className="text-right ml-3 shrink-0">
+                          <span className="text-xs font-bold text-white font-mono">{count}</span>
+                          <span className="block text-[8px] text-slate-500 uppercase tracking-wide">Pupils</span>
+                        </div>
+                      </div>
+                    );
+                  })
+                )}
+              </div>
+            </div>
           </div>
         </div>
 

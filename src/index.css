@@ -8,9 +8,18 @@
   --color-gold: #d4af37;
   --color-gold-light: #e5c05c;
   --color-gold-dark: #b8860b;
-  --color-dark-bg: #0a0b0d;
-  --color-dark-sidebar: #0f1115;
-  --color-dark-card: #16181d;
+  --color-dark-bg: var(--app-bg);
+  --color-dark-sidebar: var(--app-sidebar);
+  --color-dark-card: var(--app-card);
+}
+
+:root {
+  --app-bg: #0a0b0d;
+  --app-sidebar: #0f1115;
+  --app-card: #16181d;
+  --app-text: #e2e8f0;
+  --app-muted: #94a3b8;
+  --app-border: rgba(255, 255, 255, 0.05);
 }
 
 @layer utilities {
@@ -74,5 +83,131 @@
   #transcript-container .bg-slate-850\/30 {
     background-color: #f8fafc !important;
   }
+}
+
+/* Light mode overrides */
+.light {
+  color-scheme: light;
+  
+  --app-bg: #f9f8f6;
+  --app-sidebar: #f1efea;
+  --app-card: #ffffff;
+  --app-text: #1c1d1f;
+  --app-muted: #606470;
+  --app-border: #e2e0d9;
+}
+
+.light {
+  color: var(--app-text) !important;
+}
+
+.light .text-white,
+.light .text-gray-100,
+.light .text-gray-200,
+.light .text-gray-300,
+.light .text-slate-100,
+.light .text-slate-200,
+.light .text-slate-300,
+.light .text-slate-350 {
+  color: var(--app-text) !important;
+}
+
+.light .text-gray-400,
+.light .text-gray-500,
+.light .text-slate-400,
+.light .text-slate-450,
+.light .text-slate-500,
+.light .text-slate-550 {
+  color: var(--app-muted) !important;
+}
+
+/* Border overrides */
+.light .border-white\/5,
+.light .border-white\/10,
+.light .border-white\/15,
+.light .border-white\/20,
+.light .border-white\/25,
+.light .border-slate-700,
+.light .border-slate-750,
+.light .border-slate-800,
+.light .border-slate-850 {
+  border-color: var(--app-border) !important;
+}
+
+/* Background overrides */
+.light .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+.light .bg-white\/10 {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.light .bg-white\/\[0\.01\],
+.light .bg-white\/\[0\.02\],
+.light .bg-white\/\[0\.03\],
+.light .bg-white\/\[0\.04\] {
+  background-color: rgba(0, 0, 0, 0.02) !important;
+}
+
+.light .hover\:bg-white\/10:hover {
+  background-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+.light .hover\:bg-white\/5:hover {
+  background-color: rgba(0, 0, 0, 0.04) !important;
+}
+
+/* Hardcoded dark backgrounds mapping to light counterparts */
+.light .bg-\[\#121318\],
+.light .bg-\[\#1b1c22\],
+.light .bg-\[\#1c1e24\],
+.light .bg-slate-900,
+.light .bg-slate-950 {
+  background-color: var(--app-bg) !important;
+}
+
+.light .bg-slate-850,
+.light .bg-slate-800 {
+  background-color: var(--app-sidebar) !important;
+}
+
+/* Dividers */
+.light .divide-\[\#22242a\] > * + *,
+.light .divide-white\/5 > * + *,
+.light .divide-slate-850 > * + * {
+  border-color: var(--app-border) !important;
+}
+
+/* Input elements inside forms in light mode */
+.light input,
+.light select,
+.light textarea {
+  color: var(--app-text) !important;
+  border-color: var(--app-border) !important;
+}
+
+/* Option element overrides */
+.light option,
+.light select option {
+  background-color: var(--app-card) !important;
+  color: var(--app-text) !important;
+}
+
+/* Hover text visibility */
+.light .hover\:text-white:hover {
+  color: var(--app-text) !important;
+}
+
+/* Allow white text on hover for buttons with solid dark backgrounds on hover */
+.light .hover\:bg-rose-500:hover,
+.light .hover\:bg-rose-600:hover,
+.light .hover\:bg-emerald-550:hover,
+.light .hover\:bg-emerald-600:hover,
+.light .hover\:bg-indigo-550:hover,
+.light .hover\:bg-indigo-600:hover,
+.light .hover\:bg-gold:hover,
+.light .hover\:bg-gold-light:hover {
+  color: #ffffff !important;
 }
 

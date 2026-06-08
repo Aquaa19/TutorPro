@@ -7,7 +7,7 @@ interface SettingsScreenProps {
   onUpdateProfile: (profile: TutorProfile) => void;
   onImportBackup: (backupData: any) => Promise<boolean>;
   onExportBackup: () => any;
-  onClearEverything: () => void;
+  onClearEverything: () => Promise<void>;
 }
 
 export default function SettingsScreen({
@@ -24,7 +24,6 @@ export default function SettingsScreen({
   const [upiId, setUpiId] = useState(tutorProfile.upiId);
   const [instituteName, setInstituteName] = useState(tutorProfile.instituteName);
   const [defaultFee, setDefaultFee] = useState(tutorProfile.defaultFee.toString());
-  const [subjectText, setSubjectText] = useState(tutorProfile.subjects.join(', '));
   
   // Feedback states
   const [profileSuccess, setProfileSuccess] = useState(false);
@@ -37,15 +36,14 @@ export default function SettingsScreen({
       alert("Please check that Name, Email and Phone details are populated.");
       return;
     }
-
     onUpdateProfile({
       name,
       email,
       phone,
-      upiId,
-      instituteName: instituteName || "apex Private Core Tutoring",
-      defaultFee: Number(defaultFee) || 2000,
-      subjects: subjectText.split(',').map(s => s.trim()).filter(Boolean)
+      upiId: "",
+      instituteName: "",
+      defaultFee: 0,
+      subjects: ["Mathematics", "Physics", "Chemistry", "Biology", "Computer", "Mathematics & Computer"]
     });
 
     setProfileSuccess(true);
@@ -96,7 +94,6 @@ export default function SettingsScreen({
             setUpiId(parsed.tutor.upiId);
             setInstituteName(parsed.tutor.instituteName);
             setDefaultFee(parsed.tutor.defaultFee.toString());
-            setSubjectText(parsed.tutor.subjects.join(', '));
           } else {
             setImportFeedback({ type: 'error', msg: 'Failed to import backup. Storage quota issues.' });
           }
@@ -129,7 +126,7 @@ export default function SettingsScreen({
             </h3>
 
             <form onSubmit={handleUpdateProfileSubmit} className="space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4">
                 <div className="space-y-1.5">
                   <label className="block text-xs text-slate-400 font-mono">Tutor Full Name *</label>
                   <input
@@ -138,16 +135,6 @@ export default function SettingsScreen({
                     onChange={e => setName(e.target.value)}
                     className="w-full px-3.5 py-2 text-xs bg-white/5 border border-white/5 focus:border-gold rounded-lg text-white font-sans outline-none transition-all"
                     required
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-xs text-slate-400 font-mono">Academy/Institute Name</label>
-                  <input
-                    type="text"
-                    value={instituteName}
-                    onChange={e => setInstituteName(e.target.value)}
-                    className="w-full px-3.5 py-2 text-xs bg-white/5 border border-white/5 focus:border-gold rounded-lg text-white font-sans outline-none transition-all"
                   />
                 </div>
               </div>
@@ -176,39 +163,16 @@ export default function SettingsScreen({
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-1.5">
-                  <label className="block text-xs text-slate-400 font-mono">Standard Monthly core fee rate (₹)</label>
-                  <input
-                    type="number"
-                    value={defaultFee}
-                    onChange={e => setDefaultFee(e.target.value)}
-                    className="w-full px-3.5 py-2 text-xs bg-white/5 border border-white/5 focus:border-gold rounded-lg text-white font-sans outline-none transition-all"
-                  />
-                </div>
-
-                <div className="space-y-1.5">
-                  <label className="block text-xs text-slate-400 font-mono">Business UPI ID * (for digital receipts)</label>
-                  <input
-                    type="text"
-                    value={upiId}
-                    onChange={e => setUpiId(e.target.value)}
-                    placeholder="name@upi"
-                    className="w-full px-3.5 py-2 text-xs bg-white/5 border border-white/5 focus:border-gold rounded-lg text-white font-mono outline-none transition-all"
-                    required
-                  />
-                </div>
-              </div>
-
               <div className="space-y-1.5">
-                <label className="block text-xs text-slate-400 font-mono">Offered Speciality Subjects (comma separated)</label>
-                <input
-                  type="text"
-                  value={subjectText}
-                  onChange={e => setSubjectText(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs bg-white/5 border border-white/5 focus:border-gold rounded-lg text-white font-sans outline-none transition-all"
-                />
-                <p className="text-[10px] text-slate-500 mt-1">Separate curriculum subjects with commas e.g. Mathematics, Core Physics, Chemistry.</p>
+                <label className="block text-xs text-slate-400 font-mono">Offered Speciality Subjects</label>
+                <div className="flex flex-wrap gap-2 pt-1">
+                  {["Mathematics", "Physics", "Chemistry", "Biology", "Computer", "Mathematics & Computer"].map(sub => (
+                    <span key={sub} className="px-3 py-1 bg-gold/10 text-gold border border-gold/20 rounded-full text-xs font-semibold">
+                      {sub}
+                    </span>
+                  ))}
+                </div>
+                <p className="text-[10px] text-slate-500 mt-1">Restricted exclusively to ICSE Science subjects.</p>
               </div>
 
               <div className="pt-3 border-t border-white/5 flex items-center justify-between">
@@ -287,10 +251,11 @@ export default function SettingsScreen({
             </h3>
             <p className="text-xs text-slate-500 leading-relaxed">This completely clears all recorded students, batches, attendance history, and payment transactions cached on this browser.</p>
             <button
-              onClick={() => {
-                if (confirm("WARNING: This will permanently delete ALL recorded data on this device including student histories, receipts, and profiles. This is NOT reversible.\n\nType 'PURGE' to proceed.")) {
-                  onClearEverything();
-                  alert("Roster storage successfully purged. Re-initializing stock demo data.");
+              onClick={async () => {
+                const userInput = prompt("WARNING: This will permanently delete ALL recorded data on this device and the cloud including student histories, receipts, and profiles. This is NOT reversible.\n\nType 'PURGE' to proceed:");
+                if (userInput === 'PURGE') {
+                  await onClearEverything();
+                  alert("Database successfully purged.");
                   window.location.reload();
                 }
               }}

@@ -54,8 +54,7 @@ export default function FeeManagement({
   const studentsFeeStatusList = useMemo(() => {
     const activeStudents = students.filter(s => s.status === 'active');
     
-    // Custom deadline simulation: 5th of each month
-    // June 2026 deadline is June 5, 2026.
+    // Custom deadline simulation: 1st of each month
     // Today is June 8, 2026.
     const today = new Date('2026-06-08T11:03:15Z');
     
@@ -64,19 +63,17 @@ export default function FeeManagement({
       const isPaid = !!matchPayment;
       
       // Calculate days late:
-      // Deadline was June 5.
+      // Deadline is now the custom billing start day of the selected month
       let daysLate = 0;
       if (!isPaid) {
-        if (selectedMonth === 'June 2026') {
-          const deadline = new Date('2026-06-05');
+        try {
+          const [monthName, yearStr] = selectedMonth.split(' ');
+          const billingDay = student.billingDay || 1;
+          const deadline = new Date(`${monthName} ${billingDay}, ${yearStr}`);
           const diffTime = today.getTime() - deadline.getTime();
-          daysLate = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24))); // June is 3 days overdue
-        } else if (selectedMonth === 'May 2026') {
-          const deadline = new Date('2026-05-05');
-          const diffTime = today.getTime() - deadline.getTime();
-          daysLate = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24))); // May is 34 days overdue
-        } else {
-          daysLate = 15; // fallback representation
+          daysLate = Math.max(0, Math.floor(diffTime / (1000 * 60 * 60 * 24)));
+        } catch (err) {
+          daysLate = 7;
         }
       }
 
@@ -131,11 +128,20 @@ export default function FeeManagement({
   // WhatsApp reminder helpers
   const triggerOverdueWhatsApp = (student: Student, days: number) => {
     const formattedPhone = student.parentPhone.replace(/[^0-9+]/g, '');
+    const billingDay = student.billingDay || 1;
+    const suffix = billingDay === 1 || billingDay === 21 || billingDay === 31 
+      ? '1st' 
+      : billingDay === 2 || billingDay === 22 
+      ? '2nd' 
+      : billingDay === 3 || billingDay === 23 
+      ? '3rd' 
+      : `${billingDay}th`;
+
     const text = `*FEE DUE REMINDER*\n` +
       `*Institute*: ${tutorProfile.instituteName}\n` +
       `---------------------------\n` +
       `Dear Parent,\n` +
-      `This is a gentle reminder that the tuition fee of *₹${student.monthlyFee}* for *${student.name}* for the month of *${selectedMonth}* is overdue by *${days} days* (Due Date: 5th of month).\n\n` +
+      `This is a gentle reminder that the tuition fee of *₹${student.monthlyFee}* for *${student.name}* for the month of *${selectedMonth}* is overdue by *${days} days* (Due Date: ${suffix} of month).\n\n` +
       `Kindly complete the payment using UPI ID: *${tutorProfile.upiId}* or via cash as soon as possible.\n\n` +
       `If you have already paid, please ignore this or send a screenshot of the receipt.\n\n` +
       `Thank you!\nProf. Rajesh Kumar`;

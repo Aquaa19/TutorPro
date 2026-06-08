@@ -14,7 +14,7 @@ const DEFAULT_TUTOR: TutorProfile = {
   name: "Arkadyuti Mandal",
   email: "arkamandal1919@gmail.com",
   phone: "",
-  subjects: [],
+  subjects: ["Mathematics", "Physics", "Chemistry", "Biology", "Computer"],
   defaultFee: 0,
   upiId: "",
   instituteName: ""

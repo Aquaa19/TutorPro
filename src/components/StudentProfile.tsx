@@ -17,6 +17,7 @@ interface StudentProfileProps {
   onRecordPayment: (payment: Omit<Payment, 'id'>) => void;
   onAddPerformance: (performance: Omit<Performance, 'id'>) => void;
   onUpdateStudentStatus: (studentId: string, status: 'active' | 'inactive') => void;
+  onUpdateStudent: (student: Student) => void;
 }
 
 export default function StudentProfile({
@@ -52,6 +53,61 @@ export default function StudentProfile({
   const [payMonth, setPayMonth] = useState('June 2026');
   const [payMode, setPayMode] = useState<'Cash' | 'UPI' | 'Bank Transfer'>('UPI');
   const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
+
+  // Editing profile state
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editPhone, setEditPhone] = useState('');
+  const [editGrade, setEditGrade] = useState('');
+  const [editSubject, setEditSubject] = useState('');
+  const [editFee, setEditFee] = useState('');
+  const [editBillingDay, setEditBillingDay] = useState('1');
+  const [editBatchId, setEditBatchId] = useState('');
+  const [editStatus, setEditStatus] = useState<'active' | 'inactive'>('active');
+
+  const handleStartEdit = () => {
+    if (!student) return;
+    setEditName(student.name);
+    setEditPhone(student.parentPhone);
+    setEditGrade(student.grade);
+    setEditSubject(student.subject);
+    setEditFee(student.monthlyFee.toString());
+    setEditBillingDay((student.billingDay || 1).toString());
+    setEditBatchId(student.batchId);
+    setEditStatus(student.status);
+    setIsEditingProfile(true);
+  };
+
+  const handleSaveEdit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!student || !onUpdateStudent) return;
+
+    if (!editName || !editPhone || !editGrade || !editFee) {
+      alert("Please fill in Student Name, Parent Phone, Class Grade and Fee.");
+      return;
+    }
+
+    const bDay = Number(editBillingDay);
+    if (isNaN(bDay) || bDay < 1 || bDay > 28) {
+      alert("Billing Start Day must be a number between 1 and 28.");
+      return;
+    }
+
+    onUpdateStudent({
+      id: student.id,
+      name: editName,
+      parentPhone: editPhone.trim(),
+      grade: editGrade,
+      subject: editSubject,
+      monthlyFee: Number(editFee),
+      billingDay: bDay,
+      enrollmentDate: student.enrollmentDate,
+      batchId: editBatchId,
+      status: editStatus
+    });
+
+    setIsEditingProfile(false);
+  };
 
   // Find target student details
   const student = useMemo(() => {
@@ -352,6 +408,12 @@ export default function StudentProfile({
         </button>
 
         <div className="flex items-center gap-2">
+          <button
+            onClick={handleStartEdit}
+            className="px-3 py-1.5 rounded-lg text-xs font-mono font-semibold border border-white/10 bg-white/5 text-slate-300 hover:text-gold hover:border-gold/30 cursor-pointer transition-colors"
+          >
+            Edit Profile
+          </button>
           {/* Active status button toggle */}
           <button
             onClick={() => onUpdateStudentStatus(studentId, student.status === 'active' ? 'inactive' : 'active')}
@@ -485,7 +547,12 @@ export default function StudentProfile({
                   </div>
                 )}
               </div>
-              <p className="text-[10px] text-slate-505 pt-2 border-t border-white/5">Standard Tuition rate: ₹{student.monthlyFee}/month</p>
+              <p className="text-[10px] text-slate-505 pt-2 border-t border-white/5">Standard Tuition rate: ₹{student.monthlyFee}/month (Billing Day: {student.billingDay || 1}{((d) => {
+                if (d === 1 || d === 21 || d === 31) return 'st';
+                if (d === 2 || d === 22) return 'nd';
+                if (d === 3 || d === 23) return 'rd';
+                return 'th';
+              })(student.billingDay || 1)})</p>
             </div>
 
             {/* Average Test Performances */}
@@ -1013,6 +1080,146 @@ export default function StudentProfile({
                 Share parents via WhatsApp
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Profile Modal */}
+      {isEditingProfile && (
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-xs flex items-center justify-center z-50 p-4">
+          <div className="bg-[#16181d] border border-white/5 rounded-3xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl overflow-y-auto animate-scale-up">
+            <div className="px-6 py-4 border-b border-[#22242a] flex items-center justify-between">
+              <h3 className="text-sm font-semibold uppercase tracking-wider text-gold">Edit Student Profile</h3>
+              <button
+                onClick={() => setIsEditingProfile(false)}
+                className="p-1 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              >
+                ✕
+              </button>
+            </div>
+            <form onSubmit={handleSaveEdit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-xs text-slate-400 font-mono mb-1.5">Student Full Name *</label>
+                <input
+                  type="text"
+                  value={editName}
+                  onChange={e => setEditName(e.target.value)}
+                  className="w-full px-3.5 py-2 text-xs bg-white/[0.01] border border-white/10 focus:border-gold/50 rounded-xl text-white outline-none"
+                  required
+                />
+              </div>
+              
+              <div>
+                <label className="block text-xs text-slate-400 font-mono mb-1.5">Parent WhatsApp Number *</label>
+                <input
+                  type="tel"
+                  value={editPhone}
+                  onChange={e => setEditPhone(e.target.value)}
+                  className="w-full px-3.5 py-2 text-xs bg-white/[0.01] border border-white/10 focus:border-gold/50 rounded-xl text-white font-mono outline-none"
+                  required
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-slate-400 font-mono mb-1.5">Grade/Class Level *</label>
+                  <select
+                    value={editGrade}
+                    onChange={e => setEditGrade(e.target.value)}
+                    className="w-full px-3.5 py-2 text-xs bg-white/[0.01] border border-white/10 focus:border-gold/50 rounded-xl text-white outline-none cursor-pointer"
+                    required
+                  >
+                    {["Class 1", "Class 2", "Class 3", "Class 4", "Class 5", "Class 6", "Class 7", "Class 8", "Class 9", "Class 10", "Class 11", "Class 12"].map(grade => (
+                      <option key={grade} value={grade} className="bg-[#121318]">{grade}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 font-mono mb-1.5">Standard Subject *</label>
+                  <select
+                    value={editSubject}
+                    onChange={e => setEditSubject(e.target.value)}
+                    className="w-full px-3.5 py-2 text-xs bg-white/[0.01] border border-white/10 focus:border-gold/50 rounded-xl text-white outline-none cursor-pointer"
+                    required
+                  >
+                    {["Mathematics", "Physics", "Chemistry", "Biology", "Computer", "Mathematics & Computer"].map(sub => (
+                      <option key={sub} value={sub} className="bg-[#121318]">{sub}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-slate-400 font-mono mb-1.5">Monthly Fees amount (INR) *</label>
+                  <input
+                    type="number"
+                    value={editFee}
+                    onChange={e => setEditFee(e.target.value)}
+                    className="w-full px-3.5 py-2 text-xs bg-white/[0.01] border border-white/10 focus:border-gold/50 rounded-xl text-white outline-none"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 font-mono mb-1.5">Billing Start Day (1-28) *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    max="28"
+                    value={editBillingDay}
+                    onChange={e => setEditBillingDay(e.target.value)}
+                    className="w-full px-3.5 py-2 text-xs bg-white/[0.01] border border-white/10 focus:border-gold/50 rounded-xl text-white outline-none"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs text-slate-400 font-mono mb-1.5">Assign Core Batch Group *</label>
+                  <select
+                    value={editBatchId}
+                    onChange={e => setEditBatchId(e.target.value)}
+                    className="w-full px-3.5 py-2 text-xs bg-white/[0.01] border border-white/10 focus:border-gold/50 rounded-xl text-white outline-none cursor-pointer"
+                    required
+                  >
+                    {batches.map(b => (
+                      <option key={b.id} value={b.id} className="bg-[#121318]">
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-400 font-mono mb-1.5">Status *</label>
+                  <select
+                    value={editStatus}
+                    onChange={e => setEditStatus(e.target.value as any)}
+                    className="w-full px-3.5 py-2 text-xs bg-white/[0.01] border border-white/10 focus:border-gold/50 rounded-xl text-white outline-none cursor-pointer"
+                    required
+                  >
+                    <option value="active" className="bg-[#121318]">Active</option>
+                    <option value="inactive" className="bg-[#121318]">Inactive</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4 border-t border-[#22242a]">
+                <button
+                  type="button"
+                  onClick={() => setIsEditingProfile(false)}
+                  className="px-4 py-2 bg-white/5 border border-white/5 hover:bg-white/10 rounded-lg text-xs font-semibold text-slate-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-gold text-dark-bg hover:bg-gold-light rounded-lg text-xs font-bold uppercase tracking-wider"
+                >
+                  Save Changes
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

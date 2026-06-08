@@ -8,6 +8,12 @@ export interface Student {
   enrollmentDate: string;
   batchId: string;
   status: 'active' | 'inactive';
+  billingDay?: number;
+}
+
+export interface DayTiming {
+  day: string;
+  timing: string;
 }
 
 export interface Batch {
@@ -16,6 +22,7 @@ export interface Batch {
   timing: string;
   days: string[]; // e.g. ["Monday", "Wednesday", "Friday"]
   subject: string;
+  dayTimings?: DayTiming[];
 }
 
 export interface Attendance {

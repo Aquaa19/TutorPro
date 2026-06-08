@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  FolderLock, LayoutDashboard, Users, CalendarCheck2, CreditCard, Settings, Menu, X, Sparkles, GraduationCap, LogOut
+  FolderLock, LayoutDashboard, Users, CalendarCheck2, CreditCard, Settings, Menu, X, Sparkles, GraduationCap, LogOut, Award, Sun, Moon
 } from 'lucide-react';
 
 // Subcomponents
@@ -11,6 +11,8 @@ import AttendanceTracker from './components/AttendanceTracker';
 import FeeManagement from './components/FeeManagement';
 import SettingsScreen from './components/SettingsScreen';
 import LoginScreen from './components/LoginScreen';
+import AIReportsScreen from './components/AIReportsScreen';
+import ExamsScreen from './components/ExamsScreen';
 
 // Types and storage services
 import { Student, Batch, Attendance, Payment, Performance, TutorProfile } from './types';
@@ -24,7 +26,7 @@ import {
 } from 'firebase/firestore';
 
 interface NavState {
-  screen: 'dashboard' | 'students' | 'student-profile' | 'attendance' | 'fees' | 'settings';
+  screen: 'dashboard' | 'students' | 'student-profile' | 'attendance' | 'fees' | 'settings' | 'ai-reports' | 'exams';
   studentId?: string;
   extraState?: any;
 }
@@ -32,6 +34,23 @@ interface NavState {
 export default function App() {
   const [nav, setNav] = useState<NavState>({ screen: 'dashboard' });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // Theme State
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => (localStorage.getItem('tutor_manager_theme') as any) || 'dark');
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+  }, [theme]);
+
+  const toggleTheme = () => {
+    const nextTheme = theme === 'dark' ? 'light' : 'dark';
+    setTheme(nextTheme);
+    localStorage.setItem('tutor_manager_theme', nextTheme);
+  };
 
   // Auth State
   const [currentUser, setCurrentUser] = useState<any>(null);
@@ -55,13 +74,7 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const allowedEmail = import.meta.env.VITE_ALLOWED_EMAIL;
-        if (user.email === allowedEmail) {
-          setCurrentUser(user);
-        } else {
-          await signOut(auth);
-          setCurrentUser(null);
-        }
+        setCurrentUser(user);
       } else {
         setCurrentUser(null);
       }
@@ -132,7 +145,7 @@ export default function App() {
           name: currentUser.displayName || 'Arkadyuti Mandal',
           email: currentUser.email || '',
           phone: '',
-          subjects: [],
+          subjects: ["Mathematics", "Physics", "Chemistry", "Biology", "Computer"],
           defaultFee: 0,
           upiId: '',
           instituteName: ''
@@ -251,6 +264,11 @@ export default function App() {
     }, { merge: true });
   };
 
+  const handleUpdateStudent = async (updatedStudent: Student) => {
+    if (!currentUser) return;
+    await setDoc(doc(db, 'users', currentUser.uid, 'students', updatedStudent.id), updatedStudent);
+  };
+
   const handleAddBatch = async (newBatch: Omit<Batch, 'id'>) => {
     if (!currentUser) return;
     const id = `b_${Date.now()}`;
@@ -258,6 +276,29 @@ export default function App() {
       ...newBatch,
       id
     });
+  };
+
+  const handleUpdateBatch = async (updatedBatch: Batch) => {
+    if (!currentUser) return;
+    await setDoc(doc(db, 'users', currentUser.uid, 'batches', updatedBatch.id), updatedBatch);
+  };
+
+  const handleDeleteBatch = async (batchId: string) => {
+    if (!currentUser) return;
+    await deleteDoc(doc(db, 'users', currentUser.uid, 'batches', batchId));
+    
+    // Clean up batch reference from students
+    const assigned = students.filter(s => s.batchId === batchId);
+    if (assigned.length > 0) {
+      const batch = writeBatch(db);
+      assigned.forEach(s => {
+        batch.set(doc(db, 'users', currentUser.uid, 'students', s.id), {
+          ...s,
+          batchId: ""
+        });
+      });
+      await batch.commit();
+    }
   };
 
   const handleSaveAttendance = async (newAttendances: Omit<Attendance, 'id'>[]) => {
@@ -294,6 +335,19 @@ export default function App() {
       ...newPerf,
       id
     });
+  };
+
+  const handleAddPerformanceBatch = async (newPerfs: Omit<Performance, 'id'>[]) => {
+    if (!currentUser || newPerfs.length === 0) return;
+    const batch = writeBatch(db);
+    newPerfs.forEach((newPerf, index) => {
+      const id = `perf_${Date.now()}_${index}_${Math.random().toString(36).substring(2,6)}`;
+      batch.set(doc(db, 'users', currentUser.uid, 'performance', id), {
+        ...newPerf,
+        id
+      });
+    });
+    await batch.commit();
   };
 
   const handleUpdateTutorProfile = async (newProfile: TutorProfile) => {
@@ -354,6 +408,10 @@ export default function App() {
     batch.delete(doc(db, 'users', currentUser.uid, 'profile', 'info'));
 
     await batch.commit();
+
+    // Clear local storage and re-initialize empty datasets
+    localStorage.clear();
+    StorageService.initialize();
   };
 
   // Safe navigation transition
@@ -381,6 +439,7 @@ export default function App() {
       case 'attendance': return 'Roll roster';
       case 'fees': return 'Fee accounts';
       case 'settings': return 'Tutors settings';
+      case 'ai-reports': return 'AI Progress Dossiers';
       default: return 'Tutorly Hub';
     }
   }, [nav.screen]);
@@ -410,12 +469,21 @@ export default function App() {
         <div className="flex items-center gap-2">
           <h1 className="text-lg font-serif italic text-gold tracking-wider">TutorPro<span className="text-white font-sans not-italic font-light opacity-50 text-xs">.OS</span></h1>
         </div>
-        <button
-          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-1.5 rounded-lg bg-white/5 text-slate-400 hover:text-white"
-        >
-          {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={toggleTheme}
+            className="p-1.5 rounded-lg bg-white/5 text-slate-400 hover:text-white border border-white/5 cursor-pointer"
+            title="Toggle Theme"
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </button>
+          <button
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            className="p-1.5 rounded-lg bg-white/5 text-slate-400 hover:text-white cursor-pointer"
+          >
+            {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
       </header>
 
       {/* Navigation drawer panels context */}
@@ -424,10 +492,19 @@ export default function App() {
         ${isMobileMenuOpen ? 'translate-x-0 shadow-2xl' : '-translate-x-full'}
       `}>
         <div className="space-y-8">
-          {/* Main Logo */}
-          <div className="px-2">
-            <h1 className="text-xl font-serif italic text-gold tracking-wider">TutorPro<span className="text-white font-sans not-italic font-light opacity-50">.OS</span></h1>
-            <span className="text-[9px] text-slate-500 font-mono tracking-widest uppercase block mt-1">Apex tutoring ecosystem</span>
+          {/* Main Logo & Theme Toggle */}
+          <div className="px-2 flex items-center justify-between">
+            <div>
+              <h1 className="text-xl font-serif italic text-gold tracking-wider">TutorPro<span className="text-white font-sans not-italic font-light opacity-50">.OS</span></h1>
+              <span className="text-[9px] text-slate-500 font-mono tracking-widest uppercase block mt-1">Apex tutoring ecosystem</span>
+            </div>
+            <button
+              onClick={toggleTheme}
+              className="p-2 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-gold border border-white/5 rounded-xl cursor-pointer transition-all active:scale-95 select-none"
+              title="Toggle Theme"
+            >
+              {theme === 'dark' ? <Sun className="w-3.5 h-3.5" /> : <Moon className="w-3.5 h-3.5" />}
+            </button>
           </div>
 
           {/* Navigation Links list */}
@@ -437,6 +514,8 @@ export default function App() {
               { id: 'students', label: 'Batches', icon: Users },
               { id: 'attendance', label: 'Attendance', icon: CalendarCheck2 },
               { id: 'fees', label: 'Finances', icon: CreditCard },
+              { id: 'exams', label: 'Exams & Grades', icon: Award },
+              { id: 'ai-reports', label: 'AI Reports', icon: Sparkles },
               { id: 'settings', label: 'Settings', icon: Settings },
             ].map((item) => {
               const isActive = nav.screen === item.id || (item.id === 'students' && nav.screen === 'student-profile');
@@ -461,12 +540,21 @@ export default function App() {
         {/* Bottom User status details and Sign Out */}
         <div className="border-t border-white/5 pt-4 space-y-3">
           <div className="flex items-center gap-3 p-2.5 rounded-xl bg-white/5">
-            <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gold to-amber-500 flex items-center justify-center text-dark-bg font-bold italic text-xs shrink-0 select-none">
-              {(tutorProfile.name?.[0] || 'A').toUpperCase()}
-            </div>
+            {currentUser?.photoURL ? (
+              <img 
+                src={currentUser.photoURL} 
+                alt="Avatar" 
+                className="w-8 h-8 rounded-full object-cover border border-gold/40 shrink-0 select-none"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-gold to-amber-500 flex items-center justify-center text-dark-bg font-bold italic text-xs shrink-0 select-none">
+                {(tutorProfile.name?.[0] || 'A').toUpperCase()}
+              </div>
+            )}
             <div className="min-w-0 flex-1">
               <p className="text-xs font-semibold uppercase tracking-wider text-white truncate">{tutorProfile.name || 'Arkadyuti Mandal'}</p>
-              <p className="text-[9px] text-slate-500 uppercase tracking-tighter truncate">{tutorProfile.instituteName || 'Apex Workspace'}</p>
+              <p className="text-[9px] text-slate-500 uppercase tracking-tighter truncate">Owner Account</p>
             </div>
           </div>
           <button
@@ -506,10 +594,14 @@ export default function App() {
           <StudentsScreen
             students={students}
             batches={batches}
+            tutorProfile={tutorProfile}
             onAddStudent={handleAddStudent}
             onAddBatch={handleAddBatch}
             onDeleteStudent={handleDeleteStudent}
+            onUpdateBatch={handleUpdateBatch}
+            onDeleteBatch={handleDeleteBatch}
             onSelectStudent={(id) => handleNavigate('student-profile', { studentId: id })}
+            onUpdateStudent={handleUpdateStudent}
             extraState={nav.extraState}
           />
         )}
@@ -528,6 +620,7 @@ export default function App() {
             onRecordPayment={handleRecordPayment}
             onAddPerformance={handleAddPerformance}
             onUpdateStudentStatus={handleUpdateStudentStatus}
+            onUpdateStudent={handleUpdateStudent}
           />
         )}
 
@@ -549,6 +642,24 @@ export default function App() {
             tutorProfile={tutorProfile}
             onRecordPayment={handleRecordPayment}
             openLogPaymentDirectly={openFeesPageLogModal}
+          />
+        )}
+
+        {nav.screen === 'exams' && (
+          <ExamsScreen
+            students={students}
+            batches={batches}
+            onAddPerformanceBatch={handleAddPerformanceBatch}
+          />
+        )}
+
+        {nav.screen === 'ai-reports' && (
+          <AIReportsScreen
+            students={students}
+            batches={batches}
+            attendance={attendance}
+            payments={payments}
+            performance={performance}
           />
         )}
 
