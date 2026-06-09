@@ -18,12 +18,12 @@ export default function AIReportsScreen({
   performance,
 }: AIReportsScreenProps) {
   const [selectedStudentId, setSelectedStudentId] = useState('');
-  const [apiKey, setApiKey] = useState(import.meta.env.VITE_GEMINI_API_KEY || '');
   const [loading, setLoading] = useState(false);
   const [reportText, setReportText] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
-  const [showKeyInput, setShowKeyInput] = useState(false);
+
+  const apiKey = import.meta.env.VITE_GEMINI_API_KEY || '';
 
   // Active students only
   const activeStudents = useMemo(() => {
@@ -156,50 +156,7 @@ Tone: Insightful, highly professional, warm, and constructive. Use clear formatt
           </h1>
           <p className="text-xs text-slate-400 mt-1 font-mono uppercase tracking-widest">Generate personalized progress reports using AI</p>
         </div>
-        <button
-          onClick={() => setShowKeyInput(!showKeyInput)}
-          className="inline-flex items-center gap-1.5 px-4 py-2 bg-white/5 text-slate-200 border border-white/10 hover:bg-white/10 rounded-lg text-xs font-semibold cursor-pointer transition-all self-start sm:self-auto"
-        >
-          <Key className="w-3.5 h-3.5 text-gold opacity-75" />
-          <span>{showKeyInput ? 'Hide API Key Settings' : 'Configure API Key'}</span>
-        </button>
       </div>
-
-      {/* API Key Panel */}
-      {showKeyInput && (
-        <div className="bg-dark-card border border-white/5 rounded-3xl p-6 shadow-xl space-y-4 animate-slide-down">
-          <div className="flex items-start gap-3 bg-gold/10 border border-gold/25 rounded-2xl p-4 text-xs text-gold">
-            <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
-            <div className="space-y-1">
-              <p className="font-semibold">Secure Client-Side Operations</p>
-              <p className="text-slate-350 leading-relaxed">
-                Your API key is stored locally in your browser memory and sent directly to Google Gemini's server. It is never sent to any third party. You can also configure this permanently in Vercel environment variables under <code className="bg-black/40 px-1 py-0.5 rounded text-[10px] font-mono">VITE_GEMINI_API_KEY</code>.
-              </p>
-            </div>
-          </div>
-          <div className="flex flex-col sm:flex-row gap-3 items-end">
-            <div className="flex-1 space-y-1.5 w-full">
-              <label className="block text-xs text-slate-400 font-mono">Gemini API Key (v1beta)</label>
-              <input
-                type="password"
-                placeholder="AIzaSy..."
-                value={apiKey}
-                onChange={e => setApiKey(e.target.value)}
-                className="w-full px-3.5 py-2 text-xs bg-white/5 border border-white/10 focus:border-gold rounded-lg text-white font-mono outline-none transition-all"
-              />
-            </div>
-            <button
-              onClick={() => {
-                setShowKeyInput(false);
-                alert("API Key cached locally for this session!");
-              }}
-              className="px-5 py-2.5 bg-gold text-dark-bg hover:bg-gold-light text-xs font-bold uppercase tracking-widest rounded-lg cursor-pointer transition-all active:scale-95"
-            >
-              Save Key
-            </button>
-          </div>
-        </div>
-      )}
 
       {/* Selector and Profile Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -279,8 +236,8 @@ Tone: Insightful, highly professional, warm, and constructive. Use clear formatt
                   </button>
 
                   {!apiKey && (
-                    <p className="text-[9px] text-amber-500 text-center font-medium leading-relaxed">
-                      ⚠️ Gemini API Key not configured. Click the button at the top-right to enter it!
+                    <p className="text-[9px] text-amber-500 text-center font-medium leading-relaxed font-mono">
+                      ⚠️ VITE_GEMINI_API_KEY is missing in .env.local file.
                     </p>
                   )}
                 </div>
