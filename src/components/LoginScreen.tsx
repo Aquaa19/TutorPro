@@ -11,15 +11,7 @@ export default function LoginScreen() {
     const checkRedirectResult = async () => {
       try {
         setLoading(true);
-        const result = await getRedirectResult(auth);
-        if (result) {
-          const user = result.user;
-          const allowedEmail = import.meta.env.VITE_ALLOWED_EMAIL;
-          if (user.email !== allowedEmail) {
-            await signOut(auth);
-            setError(`Access Denied: ${user.email} is not authorized to access this dashboard.`);
-          }
-        }
+        await getRedirectResult(auth);
       } catch (err: any) {
         console.error("Redirect auth error:", err);
         setError(err.message || 'An error occurred during redirect sign-in.');
@@ -46,15 +38,7 @@ export default function LoginScreen() {
       if (isWebViewOrMobile) {
         await signInWithRedirect(auth, googleProvider);
       } else {
-        const result = await signInWithPopup(auth, googleProvider);
-        const user = result.user;
-        const allowedEmail = import.meta.env.VITE_ALLOWED_EMAIL;
-        
-        if (user.email !== allowedEmail) {
-          // Sign out immediately if not authorized
-          await signOut(auth);
-          setError(`Access Denied: ${user.email} is not authorized to access this dashboard.`);
-        }
+        await signInWithPopup(auth, googleProvider);
       }
     } catch (err: any) {
       console.error(err);

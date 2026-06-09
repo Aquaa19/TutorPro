@@ -60,4 +60,6 @@ export interface TutorProfile {
   defaultFee: number;
   upiId: string;
   instituteName: string;
+  onboarded?: boolean;
+  signatureText?: string;
 }

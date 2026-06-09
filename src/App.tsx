@@ -11,8 +11,8 @@ import AttendanceTracker from './components/AttendanceTracker';
 import FeeManagement from './components/FeeManagement';
 import SettingsScreen from './components/SettingsScreen';
 import LoginScreen from './components/LoginScreen';
-import AIReportsScreen from './components/AIReportsScreen';
 import ExamsScreen from './components/ExamsScreen';
+import OnboardingScreen from './components/OnboardingScreen';
 
 // Types and storage services
 import { Student, Batch, Attendance, Payment, Performance, TutorProfile } from './types';
@@ -75,6 +75,7 @@ export default function App() {
   // Auth State
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [authLoading, setAuthLoading] = useState(true);
+  const [profileLoading, setProfileLoading] = useState(true);
   const [firestoreLoaded, setFirestoreLoaded] = useState(false);
 
   // Core database tables inside state
@@ -94,16 +95,10 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        const allowedEmail = import.meta.env.VITE_ALLOWED_EMAIL;
-        if (user.email !== allowedEmail) {
-          console.warn(`Unverified login attempt from: ${user.email}. Logging out.`);
-          await signOut(auth);
-          setCurrentUser(null);
-        } else {
-          setCurrentUser(user);
-        }
+        setCurrentUser(user);
       } else {
         setCurrentUser(null);
+        setProfileLoading(true); // Reset for next login
       }
       setAuthLoading(false);
     });
@@ -166,24 +161,25 @@ export default function App() {
 
     const unsubProfile = onSnapshot(doc(db, 'users', currentUser.uid, 'profile', 'info'), async (docSnap) => {
       if (docSnap.exists()) {
-        setTutorProfile(docSnap.data() as TutorProfile);
+        const data = docSnap.data() as TutorProfile;
+        if (data.onboarded === undefined) {
+          data.onboarded = true; // Existing users bypass onboarding
+        }
+        setTutorProfile(data);
       } else {
         const defaultProfile: TutorProfile = {
-          name: currentUser.displayName || 'Arkadyuti Mandal',
+          name: currentUser.displayName || '',
           email: currentUser.email || '',
           phone: '',
           subjects: ["Mathematics", "Physics", "Chemistry", "Biology", "Computer"],
           defaultFee: 0,
           upiId: '',
-          instituteName: ''
+          instituteName: '',
+          onboarded: false // New users must complete onboarding
         };
         setTutorProfile(defaultProfile);
-        try {
-          await setDoc(doc(db, 'users', currentUser.uid, 'profile', 'info'), defaultProfile);
-        } catch (error) {
-          console.error("Error auto-seeding user profile to Firestore:", error);
-        }
       }
+      setProfileLoading(false);
       if (loadedCount < 6) checkAllLoaded();
     });
 
@@ -478,7 +474,7 @@ export default function App() {
   }, [nav.screen]);
 
   // Render auth loading spinner
-  if (authLoading) {
+  if (authLoading || (currentUser && profileLoading)) {
     return (
       <div className="min-h-screen bg-dark-bg text-gold flex flex-col items-center justify-center font-sans">
         <div className="w-10 h-10 border-4 border-gold border-t-transparent rounded-full animate-spin mb-4"></div>
@@ -490,6 +486,19 @@ export default function App() {
   // Overlay login screen if user is not authenticated
   if (!currentUser) {
     return <LoginScreen />;
+  }
+
+  // Overlay onboarding screen if tutor profile setup is not completed
+  if (tutorProfile && tutorProfile.onboarded === false) {
+    return (
+      <OnboardingScreen
+        currentUser={currentUser}
+        onboardingProfile={tutorProfile}
+        onComplete={() => {
+          // Snap listener automatically triggers when profile document updates in Firestore
+        }}
+      />
+    );
   }
 
   return (
