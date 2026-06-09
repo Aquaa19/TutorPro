@@ -8,18 +8,8 @@ export function printAIDossier(
   tutor: TutorProfile,
   reportText: string
 ) {
-  // Create an iframe to do the printing
-  const iframe = document.createElement('iframe');
-  iframe.style.position = 'fixed';
-  iframe.style.right = '0';
-  iframe.style.bottom = '0';
-  iframe.style.width = '0';
-  iframe.style.height = '0';
-  iframe.style.border = '0';
-  document.body.appendChild(iframe);
-
-  const doc = iframe.contentWindow?.document || iframe.contentDocument;
-  if (!doc) return;
+  const printDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  const docTitle = `${student.name.replace(/\s+/g, '_')}_Progress_Report_${printDate.replace(/\s+/g, '_')}`;
 
   // Render markdown helper specifically styled for paper printing
   const renderMarkdownForPrint = (markdown: string): string => {
@@ -62,7 +52,6 @@ export function printAIDossier(
   };
 
   const formattedContent = renderMarkdownForPrint(reportText);
-  const printDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 
   const htmlContent = `
     <!DOCTYPE html>
@@ -262,9 +251,36 @@ export function printAIDossier(
             margin-top: 4px;
             letter-spacing: 0.5px;
           }
+          
+          @media print {
+            .no-print {
+              display: none !important;
+            }
+            body {
+              padding: 0 !important;
+            }
+            .report-container {
+              border: none !important;
+              box-shadow: none !important;
+              padding: 0 !important;
+            }
+          }
+          
+          @media screen {
+            html.is-iframe .no-print-bar {
+              display: none !important;
+            }
+          }
         </style>
       </head>
       <body>
+        <div class="no-print no-print-bar" style="display: flex; justify-content: space-between; align-items: center; background: #0f172a; padding: 12px 20px; border-radius: 12px; margin: 0 auto 24px auto; max-width: 800px; border: 1px solid rgba(212, 175, 55, 0.2); font-family: sans-serif;">
+          <span style="color: #f8fafc; font-size: 13px; font-weight: 600; letter-spacing: 0.5px; font-family: 'Outfit', sans-serif;">TUTORPRO DOSSIER VIEWER</span>
+          <div style="display: flex; gap: 8px;">
+            <button onclick="window.print()" style="background: #aa7c11; color: white; border: none; padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Outfit', sans-serif;">Print / Save PDF</button>
+            <button onclick="window.close()" style="background: rgba(255, 255, 255, 0.1); color: #cbd5e1; border: 1px solid rgba(255,255,255,0.05); padding: 8px 16px; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; font-family: 'Outfit', sans-serif;">Close</button>
+          </div>
+        </div>
         <div class="report-container">
           <div class="watermark">${tutor.instituteName || 'TutorPro'}</div>
           
@@ -327,28 +343,70 @@ export function printAIDossier(
         
         <script>
           window.onload = function() {
-            const originalTitle = window.parent.document.title;
-            window.parent.document.title = "${student.name.replace(/\s+/g, '_')}_Progress_Report_${printDate.replace(/\s+/g, '_')}";
-            
-            window.focus();
-            window.print();
-            
-            const cleanup = function() {
-              window.parent.document.title = originalTitle;
+            const isIframe = window.self !== window.top;
+            if (isIframe) {
+              document.documentElement.classList.add('is-iframe');
+              const originalTitle = window.parent.document.title;
+              window.parent.document.title = "${student.name.replace(/\s+/g, '_')}_Progress_Report_${printDate.replace(/\s+/g, '_')}";
+              
+              window.focus();
+              window.print();
+              
+              const cleanup = function() {
+                window.parent.document.title = originalTitle;
+                try {
+                  window.parent.document.body.removeChild(window.frameElement);
+                } catch (e) {}
+              };
+              window.onafterprint = cleanup;
+              setTimeout(cleanup, 2000);
+            } else {
+              window.focus();
               try {
-                window.parent.document.body.removeChild(window.frameElement);
-              } catch (e) {}
-            };
-            
-            window.onafterprint = cleanup;
-            setTimeout(cleanup, 2000); // Fallback backup
+                window.print();
+              } catch (e) {
+                console.log("Auto-print blocked, user can print manually.");
+              }
+            }
           };
         </script>
       </body>
     </html>
   `;
 
-  iframe.contentWindow?.document.open();
-  iframe.contentWindow?.document.write(htmlContent);
-  iframe.contentWindow?.document.close();
+  // 1. Android Companion App WebView check
+  const androidApp = (window as any).AndroidApp;
+  if (androidApp && typeof androidApp.printInvoice === 'function') {
+    androidApp.printInvoice(htmlContent, docTitle);
+    return;
+  }
+
+  // 2. Mobile web browser check
+  const isMobile = /Android|iPhone|iPad|iPod|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  if (isMobile) {
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      printWindow.document.open();
+      printWindow.document.write(htmlContent);
+      printWindow.document.close();
+      return;
+    }
+  }
+
+  // 3. Desktop browser fallback (invisible iframe)
+  const iframe = document.createElement('iframe');
+  iframe.style.position = 'fixed';
+  iframe.style.right = '0';
+  iframe.style.bottom = '0';
+  iframe.style.width = '0';
+  iframe.style.height = '0';
+  iframe.style.border = '0';
+  document.body.appendChild(iframe);
+
+  const doc = iframe.contentWindow?.document || iframe.contentDocument;
+  if (!doc) return;
+
+  doc.open();
+  doc.write(htmlContent);
+  doc.close();
 }
