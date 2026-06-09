@@ -26,16 +26,7 @@ export default function SettingsScreen({
   const [defaultFee, setDefaultFee] = useState(tutorProfile.defaultFee?.toString() || '0');
   const [signatureText, setSignatureText] = useState(tutorProfile.signatureText || tutorProfile.name);
   
-  React.useEffect(() => {
-    // Dynamically inject Google Font for typed signature live preview
-    const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
-    return () => {
-      document.head.removeChild(link);
-    };
-  }, []);
+  
   
   // Feedback states
   const [profileSuccess, setProfileSuccess] = useState(false);
@@ -207,7 +198,7 @@ export default function SettingsScreen({
                     <span className="absolute inset-0 bg-gold/5 blur-md opacity-30 group-hover:opacity-50 transition-opacity"></span>
                     <span 
                       className="text-2xl text-gold tracking-wider select-none relative z-10"
-                      style={{ fontFamily: "'Dancing Script', cursive" }}
+                      style={{ fontFamily: "'Ballet', cursive" }}
                     >
                       {signatureText || name}
                     </span>
