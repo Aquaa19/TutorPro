@@ -70,15 +70,16 @@ export default function Dashboard({
       return { student: s, rate, count: studentAtt.length };
     }).filter(item => item.count > 0 && item.rate < 75);
 
-    // Overdue fees count: Active students who haven't paid current month fees yet
-    // and whose custom billing start day has already passed
-    const todayDom = new Date().getDate();
-    const pendingStudents = activeStudents.filter(s => {
-      const billingDay = s.billingDay || 1;
-      const isPastBillingDay = todayDom >= billingDay;
-      const hasJunePayment = payments.some(p => p.studentId === s.id && p.monthFor === currentMonthLabel && p.status === 'paid');
-      return isPastBillingDay && !hasJunePayment;
-    });
+    // Overdue fees count: Active students who have outstanding fees for the current month
+    const pendingStudents = activeStudents.map(s => {
+      const studentMonthPayments = payments.filter(p => p.studentId === s.id && p.monthFor === currentMonthLabel && p.status === 'paid');
+      const totalPaid = studentMonthPayments.reduce((sum, p) => sum + p.amountPaid, 0);
+      const outstanding = Math.max(0, s.monthlyFee - totalPaid);
+      return {
+        student: s,
+        outstanding,
+      };
+    }).filter(item => item.outstanding > 0);
 
     return {
       totalActiveStudents: activeStudents.length,
@@ -431,21 +432,21 @@ export default function Dashboard({
                 <p className="text-xs text-slate-500 leading-relaxed">All monthly fee collections are fully up to date for {currentMonthLabel}!</p>
               ) : (
                 <div className="space-y-3 max-h-[280px] overflow-y-auto pr-1">
-                  {stats.pendingStudents.slice(0, 6).map(s => (
+                  {stats.pendingStudents.slice(0, 6).map(item => (
                     <div
-                      key={s.id}
-                      onClick={() => onNavigate('student-profile', { studentId: s.id, tabIndex: 2 })} // Ledger tab
+                      key={item.student.id}
+                      onClick={() => onNavigate('student-profile', { studentId: item.student.id, tabIndex: 2 })} // Ledger tab
                       className="flex items-center justify-between p-3 rounded-xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 hover:border-white/10 cursor-pointer transition-all"
                     >
                       <div>
-                        <p className="text-xs font-semibold text-white truncate max-w-[120px]">{s.name}</p>
-                        <p className="text-[9px] text-slate-500 tracking-lighter mt-0.5 uppercase">{s.grade}</p>
+                        <p className="text-xs font-semibold text-white truncate max-w-[120px]">{item.student.name}</p>
+                        <p className="text-[9px] text-slate-500 tracking-lighter mt-0.5 uppercase">{item.student.grade}</p>
                       </div>
                       <div className="text-right">
-                        <span className="inline-block text-xs font-bold text-gold font-mono">
-                          ₹{s.monthlyFee}
+                        <span className="inline-block text-xs font-bold text-rose-450 font-mono">
+                          ₹{item.outstanding}
                         </span>
-                        <p className="text-[9px] text-slate-500 uppercase tracking-tighter">Due limit</p>
+                        <p className="text-[9px] text-slate-500 uppercase tracking-tighter">Outstanding</p>
                       </div>
                     </div>
                   ))}

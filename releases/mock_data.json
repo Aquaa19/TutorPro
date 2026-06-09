@@ -1,0 +1,322 @@
+{
+  "tutor": {
+    "name": "Arkadyuti Mandal",
+    "email": "arkamandal1919@gmail.com",
+    "phone": "+918100516694",
+    "subjects": ["Mathematics", "Physics", "Chemistry", "Computer Science"],
+    "defaultFee": 1500,
+    "upiId": "arka@ybl",
+    "instituteName": "Apex Science Academy",
+    "onboarded": true,
+    "signatureText": "Arkadyuti Mandal"
+  },
+  "batches": [
+    {
+      "id": "b_1",
+      "name": "Class 11 - Physics Batch",
+      "timing": "17:00 - 18:30",
+      "days": ["Monday", "Wednesday", "Friday"],
+      "subject": "Physics"
+    },
+    {
+      "id": "b_2",
+      "name": "Class 12 - Math Batch",
+      "timing": "16:30 - 18:00",
+      "days": ["Tuesday", "Thursday", "Saturday"],
+      "subject": "Mathematics"
+    },
+    {
+      "id": "b_3",
+      "name": "Class 10 - Computer Science",
+      "timing": "10:00 - 12:00",
+      "days": ["Sunday"],
+      "subject": "Computer Science"
+    }
+  ],
+  "students": [
+    {
+      "id": "s_1",
+      "name": "Aarav Sharma",
+      "parentPhone": "+919876543210",
+      "grade": "Class 11",
+      "subject": "Physics",
+      "monthlyFee": 1500,
+      "enrollmentDate": "2026-05-01",
+      "batchId": "b_1",
+      "status": "active",
+      "billingDay": 1
+    },
+    {
+      "id": "s_2",
+      "name": "Ananya Iyer",
+      "parentPhone": "+919123456789",
+      "grade": "Class 11",
+      "subject": "Physics",
+      "monthlyFee": 1500,
+      "enrollmentDate": "2026-05-05",
+      "batchId": "b_1",
+      "status": "active",
+      "billingDay": 5
+    },
+    {
+      "id": "s_3",
+      "name": "Jyotirmoy Pandit",
+      "parentPhone": "+919883895880",
+      "grade": "Class 12",
+      "subject": "Mathematics",
+      "monthlyFee": 1800,
+      "enrollmentDate": "2026-05-10",
+      "batchId": "b_2",
+      "status": "active",
+      "billingDay": 10
+    },
+    {
+      "id": "s_4",
+      "name": "Rohan Verma",
+      "parentPhone": "+918888888888",
+      "grade": "Class 12",
+      "subject": "Mathematics",
+      "monthlyFee": 1800,
+      "enrollmentDate": "2026-05-01",
+      "batchId": "b_2",
+      "status": "active",
+      "billingDay": 1
+    },
+    {
+      "id": "s_5",
+      "name": "Sneha Patel",
+      "parentPhone": "+917777777777",
+      "grade": "Class 10",
+      "subject": "Computer Science",
+      "monthlyFee": 1200,
+      "enrollmentDate": "2026-05-15",
+      "batchId": "b_3",
+      "status": "active",
+      "billingDay": 15
+    }
+  ],
+  "attendance": [
+    { "id": "att_1", "studentId": "s_1", "date": "2026-05-04", "status": "present" },
+    { "id": "att_2", "studentId": "s_1", "date": "2026-05-06", "status": "present" },
+    { "id": "att_3", "studentId": "s_1", "date": "2026-05-08", "status": "absent" },
+    { "id": "att_4", "studentId": "s_1", "date": "2026-05-11", "status": "present" },
+    { "id": "att_5", "studentId": "s_1", "date": "2026-05-13", "status": "present" },
+    { "id": "att_6", "studentId": "s_1", "date": "2026-05-15", "status": "present" },
+    { "id": "att_7", "studentId": "s_1", "date": "2026-06-01", "status": "present" },
+    { "id": "att_8", "studentId": "s_1", "date": "2026-06-03", "status": "present" },
+    { "id": "att_9", "studentId": "s_1", "date": "2026-06-05", "status": "present" },
+    { "id": "att_10", "studentId": "s_1", "date": "2026-06-08", "status": "present" },
+    
+    { "id": "att_11", "studentId": "s_2", "date": "2026-05-06", "status": "present" },
+    { "id": "att_12", "studentId": "s_2", "date": "2026-05-08", "status": "present" },
+    { "id": "att_13", "studentId": "s_2", "date": "2026-05-11", "status": "present" },
+    { "id": "att_14", "studentId": "s_2", "date": "2026-05-13", "status": "present" },
+    { "id": "att_15", "studentId": "s_2", "date": "2026-05-15", "status": "absent" },
+    { "id": "att_16", "studentId": "s_2", "date": "2026-06-01", "status": "present" },
+    { "id": "att_17", "studentId": "s_2", "date": "2026-06-03", "status": "late" },
+    { "id": "att_18", "studentId": "s_2", "date": "2026-06-05", "status": "absent" },
+    { "id": "att_19", "studentId": "s_2", "date": "2026-06-08", "status": "present" },
+
+    { "id": "att_20", "studentId": "s_3", "date": "2026-05-12", "status": "present" },
+    { "id": "att_21", "studentId": "s_3", "date": "2026-05-14", "status": "present" },
+    { "id": "att_22", "studentId": "s_3", "date": "2026-05-16", "status": "late" },
+    { "id": "att_23", "studentId": "s_3", "date": "2026-06-02", "status": "present" },
+    { "id": "att_24", "studentId": "s_3", "date": "2026-06-04", "status": "present" },
+    { "id": "att_25", "studentId": "s_3", "date": "2026-06-06", "status": "present" },
+
+    { "id": "att_26", "studentId": "s_4", "date": "2026-05-02", "status": "present" },
+    { "id": "att_27", "studentId": "s_4", "date": "2026-05-05", "status": "present" },
+    { "id": "att_28", "studentId": "s_4", "date": "2026-05-07", "status": "present" },
+    { "id": "att_29", "studentId": "s_4", "date": "2026-05-09", "status": "present" },
+    { "id": "att_30", "studentId": "s_4", "date": "2026-05-12", "status": "present" },
+    { "id": "att_31", "studentId": "s_4", "date": "2026-05-14", "status": "present" },
+    { "id": "att_32", "studentId": "s_4", "date": "2026-05-16", "status": "present" },
+    { "id": "att_33", "studentId": "s_4", "date": "2026-06-02", "status": "absent" },
+    { "id": "att_34", "studentId": "s_4", "date": "2026-06-04", "status": "present" },
+    { "id": "att_35", "studentId": "s_4", "date": "2026-06-06", "status": "present" },
+
+    { "id": "att_36", "studentId": "s_5", "date": "2026-05-17", "status": "present" },
+    { "id": "att_37", "studentId": "s_5", "date": "2026-05-24", "status": "present" },
+    { "id": "att_38", "studentId": "s_5", "date": "2026-05-31", "status": "absent" },
+    { "id": "att_39", "studentId": "s_5", "date": "2026-06-07", "status": "absent" }
+  ],
+  "payments": [
+    {
+      "id": "pay_may_1",
+      "studentId": "s_1",
+      "amountPaid": 1500,
+      "date": "2026-05-02",
+      "monthFor": "May 2026",
+      "mode": "UPI",
+      "status": "paid"
+    },
+    {
+      "id": "pay_may_2",
+      "studentId": "s_2",
+      "amountPaid": 1500,
+      "date": "2026-05-06",
+      "monthFor": "May 2026",
+      "mode": "UPI",
+      "status": "paid"
+    },
+    {
+      "id": "pay_may_3",
+      "studentId": "s_3",
+      "amountPaid": 1800,
+      "date": "2026-05-11",
+      "monthFor": "May 2026",
+      "mode": "Cash",
+      "status": "paid"
+    },
+    {
+      "id": "pay_may_4",
+      "studentId": "s_4",
+      "amountPaid": 1800,
+      "date": "2026-05-02",
+      "monthFor": "May 2026",
+      "mode": "Bank Transfer",
+      "status": "paid"
+    },
+    {
+      "id": "pay_may_5",
+      "studentId": "s_5",
+      "amountPaid": 1200,
+      "date": "2026-05-18",
+      "monthFor": "May 2026",
+      "mode": "UPI",
+      "status": "paid"
+    },
+    {
+      "id": "pay_1",
+      "studentId": "s_1",
+      "amountPaid": 1500,
+      "date": "2026-06-02",
+      "monthFor": "June 2026",
+      "mode": "UPI",
+      "status": "paid"
+    },
+    {
+      "id": "pay_2",
+      "studentId": "s_2",
+      "amountPaid": 750,
+      "date": "2026-06-04",
+      "monthFor": "June 2026",
+      "mode": "Cash",
+      "status": "paid"
+    },
+    {
+      "id": "pay_3",
+      "studentId": "s_3",
+      "amountPaid": 1800,
+      "date": "2026-06-06",
+      "monthFor": "June 2026",
+      "mode": "UPI",
+      "status": "paid"
+    },
+    {
+      "id": "pay_4",
+      "studentId": "s_4",
+      "amountPaid": 500,
+      "date": "2026-06-03",
+      "monthFor": "June 2026",
+      "mode": "UPI",
+      "status": "paid"
+    }
+  ],
+  "performance": [
+    {
+      "id": "perf_1_may",
+      "studentId": "s_1",
+      "testName": "May - Physics Fundamentals",
+      "totalMarks": 50,
+      "marksObtained": 38,
+      "date": "2026-05-12",
+      "remarks": "Decent foundation. Struggles slightly with mathematical derivations."
+    },
+    {
+      "id": "perf_1",
+      "studentId": "s_1",
+      "testName": "June - Kinematics and Mechanics",
+      "totalMarks": 100,
+      "marksObtained": 85,
+      "date": "2026-06-05",
+      "remarks": "Massive improvement! Strong conceptual grip on kinematics. Active in class."
+    },
+    
+    {
+      "id": "perf_2_may",
+      "studentId": "s_2",
+      "testName": "May - Physics Fundamentals",
+      "totalMarks": 50,
+      "marksObtained": 46,
+      "date": "2026-05-12",
+      "remarks": "Excellent student. Extremely structured and precise derivations."
+    },
+    {
+      "id": "perf_2",
+      "studentId": "s_2",
+      "testName": "June - Kinematics and Mechanics",
+      "totalMarks": 100,
+      "marksObtained": 92,
+      "date": "2026-06-05",
+      "remarks": "Phenomenal score. Continues to show dedication and top-tier problem solving."
+    },
+
+    {
+      "id": "perf_3_may",
+      "studentId": "s_3",
+      "testName": "May - Limits & Functions",
+      "totalMarks": 50,
+      "marksObtained": 35,
+      "date": "2026-05-15",
+      "remarks": "Understands concepts but makes silly calculation mistakes."
+    },
+    {
+      "id": "perf_3",
+      "studentId": "s_3",
+      "testName": "June - Calculus (Differentiation)",
+      "totalMarks": 100,
+      "marksObtained": 78,
+      "date": "2026-06-06",
+      "remarks": "Great understanding of derivative chain rule. Needs practice on limits logic."
+    },
+
+    {
+      "id": "perf_4_may",
+      "studentId": "s_4",
+      "testName": "May - Limits & Functions",
+      "totalMarks": 50,
+      "marksObtained": 42,
+      "date": "2026-05-15",
+      "remarks": "Highly logical thinking. Grasps calculus formulas very quickly."
+    },
+    {
+      "id": "perf_4",
+      "studentId": "s_4",
+      "testName": "June - Calculus (Differentiation)",
+      "totalMarks": 100,
+      "marksObtained": 88,
+      "date": "2026-06-06",
+      "remarks": "Superb work. Solved advanced application of derivative problems with ease."
+    },
+
+    {
+      "id": "perf_5_may",
+      "studentId": "s_5",
+      "testName": "May - Basic Syntax and Loops",
+      "totalMarks": 100,
+      "marksObtained": 90,
+      "date": "2026-05-20",
+      "remarks": "Good grip on loop syntax. Well-structured code indentation."
+    },
+    {
+      "id": "perf_5",
+      "studentId": "s_5",
+      "testName": "June - Data Structures & Algorithms",
+      "totalMarks": 100,
+      "marksObtained": 95,
+      "date": "2026-06-07",
+      "remarks": "Perfect scores on implementation questions. Logical reasoning is outstanding."
+    }
+  ]
+}

@@ -314,7 +314,7 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
             if (isIframe) {
               document.documentElement.classList.add('is-iframe');
               const originalTitle = window.parent.document.title;
-              window.parent.document.title = "${student.name.replace(/\s+/g, '_')}_${payment.date}";
+              window.parent.document.title = "${student.name.replace(/\s+/g, '_').replace(/\\/g, '\\\\').replace(/"/g, '\\"')}_${payment.date}";
               
               window.focus();
               window.print();
@@ -326,7 +326,6 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
                 } catch (e) {}
               };
               window.onafterprint = cleanup;
-              setTimeout(cleanup, 2000);
             } else {
               window.focus();
               try {
@@ -360,13 +359,15 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
     }
   }
 
-  // 3. Desktop browser fallback (invisible iframe)
+  // 3. Desktop browser fallback (invisible iframe with layout size)
   const iframe = document.createElement('iframe');
   iframe.style.position = 'fixed';
-  iframe.style.right = '0';
-  iframe.style.bottom = '0';
-  iframe.style.width = '0';
-  iframe.style.height = '0';
+  iframe.style.left = '-9999px';
+  iframe.style.top = '-9999px';
+  iframe.style.width = '1024px';
+  iframe.style.height = '768px';
+  iframe.style.opacity = '0';
+  iframe.style.pointerEvents = 'none';
   iframe.style.border = '0';
   document.body.appendChild(iframe);
 

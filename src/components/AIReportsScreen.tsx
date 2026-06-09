@@ -121,12 +121,15 @@ export default function AIReportsScreen({
       : "No test records registered yet.";
 
     const promptText = `You are a professional private tutor writing a student progress dossier for a parent. Write a highly structured, analytical, yet encouraging and professional progress report for the following student:
-Name: ${studentInfo.student.name}
+Student Name: ${studentInfo.student.name}
 Grade/Class: ${studentInfo.student.grade}
 Subject: ${studentInfo.student.subject}
 Attendance Rate: ${studentInfo.attendanceRate}% (${studentInfo.presents} sessions attended/late, ${studentInfo.absents} sessions missed)
 Average Test Percentage: ${studentInfo.avgScore !== null ? studentInfo.avgScore + '%' : 'No tests graded yet'}
 Total Tests Taken: ${studentInfo.totalTests}
+
+Tutor Name: ${tutorProfile.name}
+${tutorProfile.instituteName ? `Academy/Institute: ${tutorProfile.instituteName}` : ''}
 
 Recent Exam / Test Logs:
 ${testScoresFormatted}
@@ -137,6 +140,12 @@ Please write the dossier in beautiful, clear markdown, and structured under thes
 3. Primary Areas of Focus / Improvement
 4. Tailored Study Recommendations (practical steps for parent and student)
 5. Future Academic Projection (trend analysis)
+
+Important Persona Instructions:
+- You are the educator/tutor, ${tutorProfile.name}.
+- Refer to yourself or sign off using the name "${tutorProfile.name}" ${tutorProfile.instituteName ? `of "${tutorProfile.instituteName}"` : ''} where appropriate.
+- Absolutely DO NOT use generic placeholders like "[Tutor Name]", "[Educator Name]", "[Your Name]", or "[Academy Name]" anywhere in your response. Replace all placeholders with actual name details.
+- At the end of the dossier, you do not need to write a full signature/line block (since one will be rendered dynamically by the system), but if you include a sign-off or closing remark, write it under the name "${tutorProfile.name}".
 
 Tone: Insightful, highly professional, warm, and constructive. Use clear formatting, bullet points, and headers.`;
 

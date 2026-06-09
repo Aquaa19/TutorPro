@@ -22,57 +22,184 @@
 ## 🎨 Interactive Gallery
 
 <div align="center">
-  <p><em>Scroll horizontally or swipe to view screens. Click details below for high-resolution static previews.</em></p>
+  <p><em>Scroll horizontally or swipe to view screens. Each slide compares the Desktop Web View (left) with the Mobile WebView Companion (right).</em></p>
   
   <div style="display: flex; overflow-x: auto; gap: 16px; scroll-snap-type: x mandatory; padding: 16px; max-width: 850px; background: #0b0c10; border: 1px solid rgba(212, 175, 55, 0.15); border-radius: 20px; box-shadow: inset 0 0 20px rgba(0,0,0,0.8), 0 10px 30px rgba(0,0,0,0.5); -webkit-overflow-scrolling: touch; margin-bottom: 24px;">
     
-    <!-- Slide 1: Dashboard -->
+    <!-- Slide 1: Login -->
     <div style="flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; text-align: center; padding: 10px;">
-      <img src="./public/gallery/dashboard.png" alt="Command Center Dashboard" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); max-width: 100%; height: auto;" />
-      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">📊 01. COMMAND CENTER DASHBOARD</h4>
+      <table style="width: 100%; border: none; border-collapse: collapse; background: transparent; margin: 0 auto;">
+        <tr style="border: none; background: transparent;">
+          <td style="width: 70%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/desktop/desktop_01_login.png" alt="Desktop Login Screen" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+          <td style="width: 30%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/mobile/mobile_01_login.png.png" alt="Mobile Login Screen" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+        </tr>
+      </table>
+      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">🔐 01. SECURE GOOGLE PORTAL</h4>
+      <p style="font-size: 12px; color: #8a99ad; max-width: 600px; margin: 4px auto 0 auto; line-height: 1.5;">Elegant Google OAuth authentication gateway with specialized access redirection and responsive mobile support.</p>
+    </div>
+
+    <!-- Slide 2: Onboarding -->
+    <div style="flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; text-align: center; padding: 10px;">
+      <table style="width: 100%; border: none; border-collapse: collapse; background: transparent; margin: 0 auto;">
+        <tr style="border: none; background: transparent;">
+          <td style="width: 70%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/desktop/desktop_02_onboarding.png" alt="Desktop Onboarding Screen" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+          <td style="width: 30%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/mobile/mobile_02_onboarding.png.png" alt="Mobile Onboarding Screen" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+        </tr>
+      </table>
+      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">✍️ 02. EDUCATOR ONBOARDING & SIGNATURE PREVIEW</h4>
+      <p style="font-size: 12px; color: #8a99ad; max-width: 600px; margin: 4px auto 0 auto; line-height: 1.5;">Premium user profile configuration with interactive typed script-signature generation and default pricing structures.</p>
+    </div>
+
+    <!-- Slide 3: Dashboard -->
+    <div style="flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; text-align: center; padding: 10px;">
+      <table style="width: 100%; border: none; border-collapse: collapse; background: transparent; margin: 0 auto;">
+        <tr style="border: none; background: transparent;">
+          <td style="width: 70%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/desktop/desktop_03_dashboard.png" alt="Desktop Dashboard" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+          <td style="width: 30%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/mobile/mobile_03_dashboard.png.png" alt="Mobile Dashboard" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+        </tr>
+      </table>
+      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">📊 03. COMMAND CENTER DASHBOARD</h4>
       <p style="font-size: 12px; color: #8a99ad; max-width: 600px; margin: 4px auto 0 auto; line-height: 1.5;">Real-time overview of active students, today's attendance rate, monthly revenue, pending fees, and batch breakdown stats.</p>
     </div>
     
-    <!-- Slide 2: Batches -->
+    <!-- Slide 4: Batches -->
     <div style="flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; text-align: center; padding: 10px;">
-      <img src="./public/gallery/batches.png" alt="Student & Batch Directory" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); max-width: 100%; height: auto;" />
-      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">👥 02. BATCH & STUDENT DIRECTORY</h4>
+      <table style="width: 100%; border: none; border-collapse: collapse; background: transparent; margin: 0 auto;">
+        <tr style="border: none; background: transparent;">
+          <td style="width: 70%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/desktop/desktop_04_batches.png" alt="Desktop Batches" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+          <td style="width: 30%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/mobile/mobile_04_batches.png.png" alt="Mobile Batches" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+        </tr>
+      </table>
+      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">👥 04. BATCH & STUDENT DIRECTORY</h4>
       <p style="font-size: 12px; color: #8a99ad; max-width: 600px; margin: 4px auto 0 auto; line-height: 1.5;">Manage student enrollment details, grades, and assign them to specific time batches with a custom-bound sliding view pill animation.</p>
     </div>
-    
-    <!-- Slide 3: Attendance -->
+
+    <!-- Slide 5: Student Profile -->
     <div style="flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; text-align: center; padding: 10px;">
-      <img src="./public/gallery/attendance.png" alt="Roll Roster" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); max-width: 100%; height: auto;" />
-      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">📅 03. ROLL ROSTER ATTENDANCE</h4>
+      <table style="width: 100%; border: none; border-collapse: collapse; background: transparent; margin: 0 auto;">
+        <tr style="border: none; background: transparent;">
+          <td style="width: 70%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/desktop/desktop_05_student_profile.png" alt="Desktop Student Profile" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+          <td style="width: 30%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/mobile/mobile_05_student_profile.png.png" alt="Mobile Student Profile" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+        </tr>
+      </table>
+      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">👨‍🎓 05. STUDENT PROFILE & TRANSACTION LEDGER</h4>
+      <p style="font-size: 12px; color: #8a99ad; max-width: 600px; margin: 4px auto 0 auto; line-height: 1.5;">Comprehensive growth card tracking fee history, attendance averages, academic score graphs, and detailed contact indexes.</p>
+    </div>
+
+    <!-- Slide 6: Dossier Ledger -->
+    <div style="flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; text-align: center; padding: 10px;">
+      <table style="width: 100%; border: none; border-collapse: collapse; background: transparent; margin: 0 auto;">
+        <tr style="border: none; background: transparent;">
+          <td style="width: 70%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/desktop/desktop_06_dossier_ledger.png" alt="Desktop Dossier Ledger" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+          <td style="width: 30%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/mobile/mobile_06_dossier_chart.png.png" alt="Mobile Dossier Chart" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+        </tr>
+      </table>
+      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">📈 06. ANALYTICS & ATTENDANCE CHARTS</h4>
+      <p style="font-size: 12px; color: #8a99ad; max-width: 600px; margin: 4px auto 0 auto; line-height: 1.5;">Visual growth curves mapping monthly test performance trends against peer attendance logs.</p>
+    </div>
+    
+    <!-- Slide 7: Attendance -->
+    <div style="flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; text-align: center; padding: 10px;">
+      <table style="width: 100%; border: none; border-collapse: collapse; background: transparent; margin: 0 auto;">
+        <tr style="border: none; background: transparent;">
+          <td style="width: 70%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/desktop/desktop_07_attendance.png" alt="Desktop Attendance" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+          <td style="width: 30%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/mobile/mobile_07_mark_attendance.png.png" alt="Mobile Attendance" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+        </tr>
+      </table>
+      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">📅 07. ROLL ROSTER ATTENDANCE</h4>
       <p style="font-size: 12px; color: #8a99ad; max-width: 600px; margin: 4px auto 0 auto; line-height: 1.5;">Mark daily attendance with smart automatic scheduled day-wise list renders, or use manual/previous overrides with built-in parent WhatsApp alert templates.</p>
     </div>
     
-    <!-- Slide 4: Finances -->
+    <!-- Slide 8: Finances -->
     <div style="flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; text-align: center; padding: 10px;">
-      <img src="./public/gallery/finances.png" alt="Fee Accounts" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); max-width: 100%; height: auto;" />
-      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">💳 04. FINANCES & FEE LEDGER</h4>
+      <table style="width: 100%; border: none; border-collapse: collapse; background: transparent; margin: 0 auto;">
+        <tr style="border: none; background: transparent;">
+          <td style="width: 70%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/desktop/desktop_08_finances.png" alt="Desktop Finances" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+          <td style="width: 30%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/mobile/mobile_08_finances.png.png" alt="Mobile Finances" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+        </tr>
+      </table>
+      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">💳 08. FINANCES & FEE LEDGER</h4>
       <p style="font-size: 12px; color: #8a99ad; max-width: 600px; margin: 4px auto 0 auto; line-height: 1.5;">Record payments, track pending or due accounts, and keep logs of cash, UPI, or bank transfer payments with interactive history logs.</p>
     </div>
     
-    <!-- Slide 5: Exams -->
+    <!-- Slide 9: Exams -->
     <div style="flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; text-align: center; padding: 10px;">
-      <img src="./public/gallery/exams.png" alt="Exams & Grades" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); max-width: 100%; height: auto;" />
-      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">🏆 05. EXAMS & GRADE LEDGERS</h4>
+      <table style="width: 100%; border: none; border-collapse: collapse; background: transparent; margin: 0 auto;">
+        <tr style="border: none; background: transparent;">
+          <td style="width: 70%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/desktop/desktop_09_exams.png" alt="Desktop Exams" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+          <td style="width: 30%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/mobile/mobile_09_exams.png.png" alt="Mobile Exams" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+        </tr>
+      </table>
+      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">🏆 09. EXAMS & GRADE LEDGERS</h4>
       <p style="font-size: 12px; color: #8a99ad; max-width: 600px; margin: 4px auto 0 auto; line-height: 1.5;">Log exam names, total marks, scores obtained, and batch averages to track growth patterns across cohorts.</p>
     </div>
     
-    <!-- Slide 6: Reports -->
+    <!-- Slide 10: Reports -->
     <div style="flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; text-align: center; padding: 10px;">
-      <img src="./public/gallery/reports.png" alt="AI Progress Dossiers" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); max-width: 100%; height: auto;" />
-      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">🤖 06. AI PROGRESS DOSSIERS</h4>
+      <table style="width: 100%; border: none; border-collapse: collapse; background: transparent; margin: 0 auto;">
+        <tr style="border: none; background: transparent;">
+          <td style="width: 70%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/desktop/desktop_10_ai_reports.png" alt="Desktop AI Reports" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+          <td style="width: 30%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/mobile/mobile_10_ai_reports.png.png" alt="Mobile AI Reports" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+        </tr>
+      </table>
+      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">🤖 10. AI PROGRESS DOSSIERS</h4>
       <p style="font-size: 12px; color: #8a99ad; max-width: 600px; margin: 4px auto 0 auto; line-height: 1.5;">Generate deep, personalized student growth reports via Google Gemini 2.0 API directly from student performance and attendance logs.</p>
     </div>
     
-    <!-- Slide 7: Settings -->
+    <!-- Slide 11: Receipts -->
     <div style="flex: 0 0 100%; scroll-snap-align: start; box-sizing: border-box; text-align: center; padding: 10px;">
-      <img src="./public/gallery/settings.png" alt="System Settings" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); max-width: 100%; height: auto;" />
-      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">⚙️ 07. SYSTEM SETTINGS</h4>
-      <p style="font-size: 12px; color: #8a99ad; max-width: 600px; margin: 4px auto 0 auto; line-height: 1.5;">Export/import JSON database backups, configure institution default fees, UPI details, and reset data safely.</p>
+      <table style="width: 100%; border: none; border-collapse: collapse; background: transparent; margin: 0 auto;">
+        <tr style="border: none; background: transparent;">
+          <td style="width: 70%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/desktop/desktop_11_pdf_invoice.png" alt="Desktop Invoice Sheet" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+          <td style="width: 30%; border: none; padding: 4px; vertical-align: middle; background: transparent;">
+            <img src="./releases/gallery/mobile/mobile_11_print_receipt.png.jpg" alt="Mobile Print Receipt" style="border-radius: 12px; border: 1px solid rgba(255, 215, 0, 0.1); width: 100%; height: auto; display: block;" />
+          </td>
+        </tr>
+      </table>
+      <h4 style="color: #d4af37; margin-top: 12px; font-family: monospace; font-size: 14px; letter-spacing: 2px;">📄 11. INVOICES & RECEIPT PRINT SHEETS</h4>
+      <p style="font-size: 12px; color: #8a99ad; max-width: 600px; margin: 4px auto 0 auto; line-height: 1.5;">Generate beautifully branded invoices and receipts with custom typography, typed signatures, and dynamic payment badge displays.</p>
     </div>
     
   </div>
@@ -82,20 +209,57 @@
   <summary>🔍 Click to view individual high-resolution screenshots</summary>
   <br>
   
-  * **01. Command Center Dashboard**
-    ![Dashboard](./public/gallery/dashboard.png)
-  * **02. Batch & Student Directory**
-    ![Batches](./public/gallery/batches.png)
-  * **03. Roll Roster (Attendance)**
-    ![Attendance](./public/gallery/attendance.png)
-  * **04. Finances & Fee Ledger**
-    ![Finances](./public/gallery/finances.png)
-  * **05. Exams & Grade Ledgers**
-    ![Exams](./public/gallery/exams.png)
-  * **06. AI Progress Dossiers**
-    ![AI Reports](./public/gallery/reports.png)
-  * **07. System Settings**
-    ![Settings](./public/gallery/settings.png)
+  ### 🖥️ Desktop Web App Previews
+  
+  * **01. Secure Google Login Portal**
+    ![Desktop Login](./releases/gallery/desktop/desktop_01_login.png)
+  * **02. Premium Educator Onboarding**
+    ![Desktop Onboarding](./releases/gallery/desktop/desktop_02_onboarding.png)
+  * **03. Command Center Dashboard**
+    ![Desktop Dashboard](./releases/gallery/desktop/desktop_03_dashboard.png)
+  * **04. Batch & Student Directory**
+    ![Desktop Batches](./releases/gallery/desktop/desktop_04_batches.png)
+  * **05. Student Profile & Transaction Ledger**
+    ![Desktop Student Profile](./releases/gallery/desktop/desktop_05_student_profile.png)
+  * **06. Dossier & Performance Ledger**
+    ![Desktop Dossier Ledger](./releases/gallery/desktop/desktop_06_dossier_ledger.png)
+  * **07. Roll Roster (Attendance)**
+    ![Desktop Attendance](./releases/gallery/desktop/desktop_07_attendance.png)
+  * **08. Fee Management & Ledger**
+    ![Desktop Finances](./releases/gallery/desktop/desktop_08_finances.png)
+  * **09. Exams & Cohort Grades**
+    ![Desktop Exams](./releases/gallery/desktop/desktop_09_exams.png)
+  * **10. AI Progress Dossier Studio**
+    ![Desktop AI Reports](./releases/gallery/desktop/desktop_10_ai_reports.png)
+  * **11. Printed Invoice Sheet**
+    ![Desktop PDF Invoice](./releases/gallery/desktop/desktop_11_pdf_invoice.png)
+
+  <br>
+
+  ### 📱 Mobile Companion Previews
+  
+  * **01. Mobile Login Screen**
+    ![Mobile Login](./releases/gallery/mobile/mobile_01_login.png.png)
+  * **02. Mobile Tutor Onboarding**
+    ![Mobile Onboarding](./releases/gallery/mobile/mobile_02_onboarding.png.png)
+  * **03. Mobile Command Dashboard**
+    ![Mobile Dashboard](./releases/gallery/mobile/mobile_03_dashboard.png.png)
+  * **04. Mobile Batch Lists**
+    ![Mobile Batches](./releases/gallery/mobile/mobile_04_batches.png.png)
+  * **05. Mobile Student Profile**
+    ![Mobile Student Profile](./releases/gallery/mobile/mobile_05_student_profile.png.png)
+  * **06. Mobile Dossier Analytics**
+    ![Mobile Dossier Chart](./releases/gallery/mobile/mobile_06_dossier_chart.png.png)
+  * **07. Mobile Attendance Marker**
+    ![Mobile Attendance](./releases/gallery/mobile/mobile_07_mark_attendance.png.png)
+  * **08. Mobile Fee Accounts**
+    ![Mobile Finances](./releases/gallery/mobile/mobile_08_finances.png.png)
+  * **09. Mobile Exam Records**
+    ![Mobile Exams](./releases/gallery/mobile/mobile_09_exams.png.png)
+  * **10. Mobile AI Dossier Generation**
+    ![Mobile AI Reports](./releases/gallery/mobile/mobile_10_ai_reports.png.png)
+  * **11. Mobile Invoice Print Sheet**
+    ![Mobile Print Receipt](./releases/gallery/mobile/mobile_11_print_receipt.png.jpg)
 </details>
 
 ---
