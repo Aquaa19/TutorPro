@@ -666,6 +666,7 @@ export default function App() {
             attendance={attendance}
             payments={payments}
             performance={performance}
+            tutorProfile={tutorProfile}
           />
         )}
 

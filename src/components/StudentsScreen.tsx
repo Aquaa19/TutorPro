@@ -1,6 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Plus, Filter, Users, Calendar, IndianRupee, Phone, ArrowUpRight, GraduationCap, Clock, Edit3, Trash2 } from 'lucide-react';
 import { Student, Batch, TutorProfile } from '../types';
+import { motion } from 'framer-motion';
 
 interface StudentsScreenProps {
   students: Student[];
@@ -866,26 +867,36 @@ export default function StudentsScreen({
       {/* Roster Controllers */}
       <div className="bg-dark-card border border-white/5 rounded-3xl p-5 shadow-xl space-y-4">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex rounded-lg bg-white/5 p-1 self-start border border-white/5">
+          <div className="flex rounded-lg bg-white/5 p-1 self-start border border-white/5 relative">
             <button
               onClick={() => setViewMode('all')}
-              className={`px-4 py-1.5 rounded-md text-[10px] uppercase font-bold tracking-wider cursor-pointer transition-all ${
-                viewMode === 'all' 
-                  ? 'bg-white/10 text-white shadow-xs' 
-                  : 'text-slate-400 hover:text-white'
+              className={`relative px-4 py-1.5 rounded-md text-[10px] uppercase font-bold tracking-wider cursor-pointer transition-colors duration-250 select-none ${
+                viewMode === 'all' ? 'text-white' : 'text-slate-400 hover:text-white'
               }`}
             >
-              All Students ({filteredStudents.length})
+              {viewMode === 'all' && (
+                <motion.div
+                  layoutId="activeStudentsViewPill"
+                  className="absolute inset-0 bg-white/10 rounded-md shadow-xs z-0"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10">All Students ({filteredStudents.length})</span>
             </button>
             <button
               onClick={() => setViewMode('batch')}
-              className={`px-4 py-1.5 rounded-md text-[10px] uppercase font-bold tracking-wider cursor-pointer transition-all ${
-                viewMode === 'batch' 
-                  ? 'bg-white/10 text-white shadow-xs' 
-                  : 'text-slate-400 hover:text-white'
+              className={`relative px-4 py-1.5 rounded-md text-[10px] uppercase font-bold tracking-wider cursor-pointer transition-colors duration-250 select-none ${
+                viewMode === 'batch' ? 'text-white' : 'text-slate-400 hover:text-white'
               }`}
             >
-              Group By Batch
+              {viewMode === 'batch' && (
+                <motion.div
+                  layoutId="activeStudentsViewPill"
+                  className="absolute inset-0 bg-white/10 rounded-md shadow-xs z-0"
+                  transition={{ type: 'spring', stiffness: 380, damping: 30 }}
+                />
+              )}
+              <span className="relative z-10">Group By Batch</span>
             </button>
           </div>
 

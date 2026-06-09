@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Sparkles, User, Calendar, GraduationCap, Award, BookOpen, Copy, Check, FileText, AlertCircle, Key, RefreshCcw } from 'lucide-react';
-import { Student, Batch, Attendance, Payment, Performance } from '../types';
+import { Student, Batch, Attendance, Payment, Performance, TutorProfile } from '../types';
+import { printAIDossier } from '../utils/printAIDossier';
 
 interface AIReportsScreenProps {
   students: Student[];
@@ -8,6 +9,7 @@ interface AIReportsScreenProps {
   attendance: Attendance[];
   payments: Payment[];
   performance: Performance[];
+  tutorProfile: TutorProfile;
 }
 
 const renderMarkdown = (markdown: string): string => {
@@ -55,6 +57,7 @@ export default function AIReportsScreen({
   attendance,
   payments,
   performance,
+  tutorProfile,
 }: AIReportsScreenProps) {
   const [selectedStudentId, setSelectedStudentId] = useState('');
   const [loading, setLoading] = useState(false);
@@ -138,9 +141,12 @@ Please write the dossier in beautiful, clear markdown, and structured under thes
 Tone: Insightful, highly professional, warm, and constructive. Use clear formatting, bullet points, and headers.`;
 
     const models = [
+      'gemini-2.5-flash-lite',
+      'gemini-flash-lite-latest',
+      'gemini-3.1-flash-lite-preview',
+      'gemini-3-flash-preview',
       'gemini-2.5-flash',
       'gemini-3.5-flash',
-      'gemini-2.0-flash',
       'gemini-flash-latest'
     ];
 
@@ -364,10 +370,17 @@ Tone: Insightful, highly professional, warm, and constructive. Use clear formatt
                 />
               )}
             </div>
-            {reportText && (
+            {reportText && studentInfo && (
               <div className="border-t border-white/5 pt-4 mt-6 flex justify-end">
                 <button
-                  onClick={() => window.print()}
+                  onClick={() => printAIDossier(
+                    studentInfo.student,
+                    studentInfo.batch,
+                    studentInfo.attendanceRate,
+                    studentInfo.avgScore,
+                    tutorProfile,
+                    reportText
+                  )}
                   className="px-5 py-2 bg-white/5 hover:bg-white/10 text-slate-200 border border-white/5 rounded-lg text-xs font-bold uppercase tracking-widest cursor-pointer transition-all active:scale-95"
                 >
                   Print Report Dossier
