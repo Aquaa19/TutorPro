@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { signInWithPopup, signOut } from 'firebase/auth';
+import React, { useState, useEffect } from 'react';
+import { signInWithPopup, signInWithRedirect, getRedirectResult, signOut } from 'firebase/auth';
 import { auth, googleProvider } from '../utils/firebase';
 import { GraduationCap, Lock, LogIn, AlertCircle } from 'lucide-react';
 
@@ -7,18 +7,54 @@ export default function LoginScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  useEffect(() => {
+    const checkRedirectResult = async () => {
+      try {
+        setLoading(true);
+        const result = await getRedirectResult(auth);
+        if (result) {
+          const user = result.user;
+          const allowedEmail = import.meta.env.VITE_ALLOWED_EMAIL;
+          if (user.email !== allowedEmail) {
+            await signOut(auth);
+            setError(`Access Denied: ${user.email} is not authorized to access this dashboard.`);
+          }
+        }
+      } catch (err: any) {
+        console.error("Redirect auth error:", err);
+        setError(err.message || 'An error occurred during redirect sign-in.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    // Check redirect result if we are in WebView or mobile browser
+    const isWebViewOrMobile = window.location.search.includes('webview=true') || 
+                              /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|wv|WebView/i.test(navigator.userAgent);
+    if (isWebViewOrMobile) {
+      checkRedirectResult();
+    }
+  }, []);
+
   const handleGoogleSignIn = async () => {
     setLoading(true);
     setError(null);
     try {
-      const result = await signInWithPopup(auth, googleProvider);
-      const user = result.user;
-      const allowedEmail = import.meta.env.VITE_ALLOWED_EMAIL;
+      const isWebViewOrMobile = window.location.search.includes('webview=true') || 
+                                /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|wv|WebView/i.test(navigator.userAgent);
       
-      if (user.email !== allowedEmail) {
-        // Sign out immediately if not authorized
-        await signOut(auth);
-        setError(`Access Denied: ${user.email} is not authorized to access this dashboard.`);
+      if (isWebViewOrMobile) {
+        await signInWithRedirect(auth, googleProvider);
+      } else {
+        const result = await signInWithPopup(auth, googleProvider);
+        const user = result.user;
+        const allowedEmail = import.meta.env.VITE_ALLOWED_EMAIL;
+        
+        if (user.email !== allowedEmail) {
+          // Sign out immediately if not authorized
+          await signOut(auth);
+          setError(`Access Denied: ${user.email} is not authorized to access this dashboard.`);
+        }
       }
     } catch (err: any) {
       console.error(err);
@@ -26,7 +62,12 @@ export default function LoginScreen() {
         setError(err.message || 'An error occurred during authentication.');
       }
     } finally {
-      setLoading(false);
+      // For redirect flow, we keep loading true since page is redirecting away
+      const isWebViewOrMobile = window.location.search.includes('webview=true') || 
+                                /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|wv|WebView/i.test(navigator.userAgent);
+      if (!isWebViewOrMobile) {
+        setLoading(false);
+      }
     }
   };
 

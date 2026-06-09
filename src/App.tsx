@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { 
-  FolderLock, LayoutDashboard, Users, CalendarCheck2, CreditCard, Settings, Menu, X, Sparkles, GraduationCap, LogOut, Award, Sun, Moon
+  FolderLock, LayoutDashboard, Users, CalendarCheck2, CreditCard, Settings, Menu, X, Sparkles, GraduationCap, LogOut, Award, Sun, Moon, ArrowUp
 } from 'lucide-react';
 
 // Subcomponents
@@ -34,6 +34,26 @@ interface NavState {
 export default function App() {
   const [nav, setNav] = useState<NavState>({ screen: 'dashboard' });
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showScrollTop, setShowScrollTop] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollTop(true);
+      } else {
+        setShowScrollTop(false);
+      }
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
 
   // Theme State
   const [theme, setTheme] = useState<'dark' | 'light'>(() => (localStorage.getItem('tutor_manager_theme') as any) || 'dark');
@@ -74,7 +94,14 @@ export default function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
-        setCurrentUser(user);
+        const allowedEmail = import.meta.env.VITE_ALLOWED_EMAIL;
+        if (user.email !== allowedEmail) {
+          console.warn(`Unverified login attempt from: ${user.email}. Logging out.`);
+          await signOut(auth);
+          setCurrentUser(null);
+        } else {
+          setCurrentUser(user);
+        }
       } else {
         setCurrentUser(null);
       }
@@ -678,6 +705,15 @@ export default function App() {
             onExportBackup={handleExportBackup}
             onClearEverything={handleClearEverything}
           />
+        )}
+        {showScrollTop && (
+          <button
+            onClick={scrollToTop}
+            className="fixed bottom-6 right-6 z-50 p-3 rounded-full bg-gold/10 border border-gold/30 text-gold hover:text-white hover:bg-gold/20 backdrop-blur-md shadow-lg transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer flex items-center justify-center animate-fade-in"
+            title="Scroll to Top"
+          >
+            <ArrowUp className="w-5 h-5" />
+          </button>
         )}
       </main>
     </div>
