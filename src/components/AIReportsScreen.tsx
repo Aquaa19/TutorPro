@@ -10,6 +10,45 @@ interface AIReportsScreenProps {
   performance: Performance[];
 }
 
+const renderMarkdown = (markdown: string): string => {
+  let html = markdown;
+
+  // Escape HTML tags to prevent XSS
+  html = html
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // Bold (**text**)
+  html = html.replace(/\*\*(.*?)\*\*/g, "<strong class='font-semibold text-white'>$1</strong>");
+
+  // Italics (*text*)
+  html = html.replace(/(?<!^\s*\*)\*(?!\s)(.*?)\*/gm, "<em class='text-slate-300'>$1</em>");
+
+  // Horizontal rules (---)
+  html = html.replace(/^---$/gm, "<hr class='border-white/5 my-6' />");
+
+  // Headers (###, ##, #)
+  html = html.replace(/^### (.*?)$/gm, "<h4 class='text-xs font-mono uppercase tracking-widest text-[#d4af37] mt-6 mb-2'>$1</h4>");
+  html = html.replace(/^## (.*?)$/gm, "<h3 class='text-base font-serif italic text-white mt-8 mb-3 border-b border-white/5 pb-1'>$1</h3>");
+  html = html.replace(/^# (.*?)$/gm, "<h2 class='text-lg font-serif italic text-white mt-10 mb-4 pb-2 border-b border-white/10'>$1</h2>");
+
+  // Unordered Lists (* item)
+  html = html.replace(/^[\*\-+] (.*?)$/gm, "<li class='list-disc ml-5 pl-1.5 text-slate-350 my-1.5'>$1</li>");
+
+  // Paragraph blocks (split by double newlines)
+  const sections = html.split(/\n\n+/);
+  const formatted = sections.map(sec => {
+    const trimmed = sec.trim();
+    if (trimmed.startsWith('<h') || trimmed.startsWith('<hr') || trimmed.startsWith('<li')) {
+      return trimmed;
+    }
+    return `<p class="leading-relaxed text-slate-350 my-4 text-xs md:text-sm">${trimmed.replace(/\n/g, '<br />')}</p>`;
+  });
+
+  return formatted.join('\n');
+};
+
 export default function AIReportsScreen({
   students,
   batches,
@@ -301,10 +340,10 @@ Tone: Insightful, highly professional, warm, and constructive. Use clear formatt
               )}
 
               {reportText && (
-                <div className="prose prose-invert max-w-none text-sm text-slate-300 leading-relaxed space-y-4 whitespace-pre-wrap select-text font-sans selection:bg-gold/20 selection:text-white">
-                  {/* Clean presentation for markdown */}
-                  {reportText}
-                </div>
+                <div 
+                  className="prose prose-invert max-w-none text-slate-300 select-text font-sans selection:bg-gold/20 selection:text-white"
+                  dangerouslySetInnerHTML={{ __html: renderMarkdown(reportText) }}
+                />
               )}
             </div>
             {reportText && (
