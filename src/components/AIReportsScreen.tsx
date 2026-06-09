@@ -137,44 +137,62 @@ Please write the dossier in beautiful, clear markdown, and structured under thes
 
 Tone: Insightful, highly professional, warm, and constructive. Use clear formatting, bullet points, and headers.`;
 
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  { text: promptText }
-                ]
-              }
-            ]
-          })
+    const models = [
+      'gemini-2.5-flash',
+      'gemini-3.5-flash',
+      'gemini-2.0-flash',
+      'gemini-flash-latest'
+    ];
+
+    let lastError: any = null;
+    let generatedText = null;
+
+    for (const model of models) {
+      try {
+        const response = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              contents: [
+                {
+                  parts: [
+                    { text: promptText }
+                  ]
+                }
+              ]
+            })
+          }
+        );
+
+        const resJson = await response.json();
+
+        if (!response.ok) {
+          throw new Error(resJson.error?.message || `Model ${model} returned error status ${response.status}`);
         }
-      );
 
-      const resJson = await response.json();
-
-      if (!response.ok) {
-        throw new Error(resJson.error?.message || 'Failed to call Gemini API. Please verify your API key.');
+        generatedText = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
+        if (!generatedText) {
+          throw new Error(`Model ${model} returned an empty response.`);
+        }
+        
+        // Successfully generated
+        break;
+      } catch (err: any) {
+        console.warn(`Model ${model} failed:`, err);
+        lastError = err;
       }
-
-      const generatedText = resJson.candidates?.[0]?.content?.parts?.[0]?.text;
-      if (!generatedText) {
-        throw new Error('API returned an empty response. Try again.');
-      }
-
-      setReportText(generatedText);
-    } catch (err: any) {
-      console.error(err);
-      setError(err.message || 'Failed to generate progress dossier.');
-    } finally {
-      setLoading(false);
     }
+
+    if (generatedText) {
+      setReportText(generatedText);
+    } else {
+      setError(lastError?.message || 'Failed to generate progress dossier with any of the available models.');
+    }
+    setLoading(false);
   };
 
   const handleCopy = () => {

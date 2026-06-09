@@ -34,6 +34,7 @@ export default function StudentProfile({
   onRecordPayment,
   onAddPerformance,
   onUpdateStudentStatus,
+  onUpdateStudent,
 }: StudentProfileProps) {
   const [activeTab, setActiveTab] = useState(initialTab);
   
