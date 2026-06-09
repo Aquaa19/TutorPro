@@ -256,14 +256,6 @@ export function printAIDossier(
             .no-print {
               display: none !important;
             }
-            body {
-              padding: 0 !important;
-            }
-            .report-container {
-              border: none !important;
-              box-shadow: none !important;
-              padding: 0 !important;
-            }
           }
           
           @media screen {

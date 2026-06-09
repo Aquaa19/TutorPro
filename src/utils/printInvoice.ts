@@ -204,14 +204,6 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
             .no-print {
               display: none !important;
             }
-            body {
-              padding: 0 !important;
-            }
-            .receipt-container {
-              border: none !important;
-              box-shadow: none !important;
-              padding: 0 !important;
-            }
           }
           
           @media screen {
