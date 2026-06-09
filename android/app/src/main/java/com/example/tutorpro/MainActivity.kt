@@ -132,6 +132,24 @@ fun WebViewScreen(url: String, modifier: Modifier = Modifier) {
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
                     cookieManager.setAcceptThirdPartyCookies(this, true)
                 }
+                
+                // Add JavaScript Interface for native printing support
+                addJavascriptInterface(object {
+                    @android.webkit.JavascriptInterface
+                    fun printInvoice(html: String, title: String) {
+                        (context as? android.app.Activity)?.runOnUiThread {
+                            val tempWebView = android.webkit.WebView(context)
+                            tempWebView.webViewClient = object : android.webkit.WebViewClient() {
+                                override fun onPageFinished(view: android.webkit.WebView?, url: String?) {
+                                    val printManager = context.getSystemService(android.content.Context.PRINT_SERVICE) as android.print.PrintManager
+                                    val printAdapter = tempWebView.createPrintDocumentAdapter(title)
+                                    printManager.print(title, printAdapter, android.print.PrintAttributes.Builder().build())
+                                }
+                            }
+                            tempWebView.loadDataWithBaseURL("https://tutor-manager-aquaaxs-projects.vercel.app/", html, "text/html", "UTF-8", null)
+                        }
+                    }
+                }, "AndroidApp")
                  
                 loadUrl(url)
                 webViewInstance = this

@@ -4,12 +4,12 @@
     android:height="108dp"
     android:viewportWidth="100"
     android:viewportHeight="100">
-  <group android:scaleX="0.69"
-      android:scaleY="0.69"
-      android:translateX="15.5"
-      android:translateY="15.5">
+  <group android:scaleX="0.67903847"
+      android:scaleY="0.67903847"
+      android:translateX="16.048077"
+      android:translateY="16.048077">
     <path
-        android:pathData="M50,50m-46,0a46,46 0,1 1,92 0a46,46 0,1 1,-92 0"
+        android:pathData="M26,4L74,4A22,22 0,0 1,96 26L96,74A22,22 0,0 1,74 96L26,96A22,22 0,0 1,4 74L4,26A22,22 0,0 1,26 4z"
         android:strokeWidth="4"
         android:fillColor="#111827">
       <aapt:attr name="android:strokeColor">
