@@ -279,7 +279,7 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
               <div class="payment-status-badge">PAID</div>
             </div>
             <div class="signature-area">
-              <div class="signature-name">${tutor.name || 'Arkadyuti Mandal'}</div>
+              <div class="signature-name">${tutor.signatureText || tutor.name || 'Arkadyuti Mandal'}</div>
               <div class="signature-line"></div>
               <div class="signature-title">Authorized Signature</div>
             </div>

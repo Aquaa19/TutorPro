@@ -153,10 +153,19 @@ Tone: Insightful, highly professional, warm, and constructive. Use clear formatt
     let lastError: any = null;
     let generatedText = null;
 
+    const isLocal = typeof window !== 'undefined' && 
+      (window.location.hostname === 'localhost' || 
+       window.location.hostname === '127.0.0.1' || 
+       window.location.hostname.startsWith('192.168.'));
+
+    const geminiBaseUrl = isLocal 
+      ? 'https://generativelanguage.googleapis.com' 
+      : `${window.location.protocol}//${window.location.host}/__/gemini`;
+
     for (const model of models) {
       try {
         const response = await fetch(
-          `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+          `${geminiBaseUrl}/v1beta/models/${model}:generateContent?key=${apiKey}`,
           {
             method: 'POST',
             headers: {

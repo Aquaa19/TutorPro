@@ -30,16 +30,7 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
     }
   }, [name, onboardingProfile.signatureText]);
 
-  // Dynamically load Dancing Script font for the signature preview
-  useEffect(() => {
-    const link = document.createElement('link');
-    link.href = 'https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600&display=swap';
-    link.rel = 'stylesheet';
-    document.head.appendChild(link);
-    return () => {
-      document.head.removeChild(link);
-    };
-  }, []);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -238,7 +229,7 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
                   <span className="absolute inset-0 bg-gold/5 blur-md opacity-30 group-hover:opacity-50 transition-opacity"></span>
                   <span 
                     className="text-2xl text-gold tracking-wider select-none relative z-10"
-                    style={{ fontFamily: "'Dancing Script', cursive" }}
+                    style={{ fontFamily: "'Ballet', cursive" }}
                   >
                     {signatureText || 'Your Signature'}
                   </span>

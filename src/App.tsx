@@ -13,6 +13,7 @@ import SettingsScreen from './components/SettingsScreen';
 import LoginScreen from './components/LoginScreen';
 import ExamsScreen from './components/ExamsScreen';
 import OnboardingScreen from './components/OnboardingScreen';
+import AIReportsScreen from './components/AIReportsScreen';
 
 // Types and storage services
 import { Student, Batch, Attendance, Payment, Performance, TutorProfile } from './types';
