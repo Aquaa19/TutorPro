@@ -34,7 +34,7 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim() || !phone.trim() || !instituteName.trim() || !signatureText.trim()) {
+    if (!name.trim() || !phone.trim() || !signatureText.trim()) {
       setError('Please fill in all required profile fields.');
       return;
     }
@@ -143,14 +143,13 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
 
             <div className="space-y-1">
               <label className="text-[10px] font-mono text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                <Landmark className="w-3 h-3 text-gold/80" /> Institute / Academy Name <span className="text-red-500">*</span>
+                <Landmark className="w-3 h-3 text-gold/80" /> Institute / Academy Name (Optional)
               </label>
               <input
                 type="text"
-                required
                 value={instituteName}
                 onChange={e => setInstituteName(e.target.value)}
-                placeholder="e.g. Kumar Classes / Private Tutorial Hub"
+                placeholder="e.g. Kumar Classes / Private Tutorial Hub (Optional)"
                 className="w-full px-3.5 py-2.5 text-xs bg-white/[0.01] border border-white/10 hover:bg-white/[0.03] focus:border-gold/50 rounded-xl text-white outline-none transition-all"
               />
             </div>
@@ -174,33 +173,6 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
               <span className="text-[9px] text-slate-500 block">Separating subjects with commas makes them selectable tags when adding new batches.</span>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                  <DollarSign className="w-3 h-3 text-gold/80" /> Default Monthly Fee Rate
-                </label>
-                <input
-                  type="number"
-                  value={defaultFee}
-                  onChange={e => setDefaultFee(e.target.value)}
-                  placeholder="e.g. 1500"
-                  className="w-full px-3.5 py-2.5 text-xs bg-white/[0.01] border border-white/10 hover:bg-white/[0.03] focus:border-gold/50 rounded-xl text-white font-mono outline-none transition-all"
-                />
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[10px] font-mono text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                  <Wallet className="w-3 h-3 text-gold/80" /> UPI ID (for receiving fee payments)
-                </label>
-                <input
-                  type="text"
-                  value={upiId}
-                  onChange={e => setUpiId(e.target.value)}
-                  placeholder="e.g. name@upi / phone@ybl"
-                  className="w-full px-3.5 py-2.5 text-xs bg-white/[0.01] border border-white/10 hover:bg-white/[0.03] focus:border-gold/50 rounded-xl text-white font-mono outline-none transition-all"
-                />
-              </div>
-            </div>
           </div>
 
           {/* Section 3: Typed Signature */}

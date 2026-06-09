@@ -366,8 +366,6 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
   iframe.style.top = '-9999px';
   iframe.style.width = '1024px';
   iframe.style.height = '768px';
-  iframe.style.opacity = '0';
-  iframe.style.pointerEvents = 'none';
   iframe.style.border = '0';
   document.body.appendChild(iframe);
 

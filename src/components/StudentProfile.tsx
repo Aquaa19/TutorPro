@@ -4,6 +4,7 @@ import {
 } from 'lucide-react';
 import { Student, Batch, Attendance, Payment, Performance, TutorProfile } from '../types';
 import { printInvoice } from '../utils/printInvoice';
+import { printTranscript } from '../utils/printTranscript';
 
 interface StudentProfileProps {
   studentId: string;
@@ -185,6 +186,7 @@ export default function StudentProfile({
       junePaymentInfo,
       mayPaymentInfo,
       averageScoreRate,
+      hasJunePaid: junePaymentInfo.status === 'paid',
     };
   }, [studentAtt, studentPayments, studentPerformance, student.monthlyFee]);
 
@@ -833,7 +835,7 @@ export default function StudentProfile({
                               onClick={() => {
                                 const text = `*TUITION FEE RECEIPT*\n` +
                                   `---------------------------\n` +
-                                  `*Institute*: ${tutorProfile.instituteName}\n` +
+                                  (tutorProfile.instituteName ? `*Institute*: ${tutorProfile.instituteName}\n` : '') +
                                   `*Tutor*: ${tutorProfile.name} (${tutorProfile.phone})\n` +
                                   `*Date*: ${p.date}\n` +
                                   `*Receipt ID*: #${p.id.slice(0, 8)}\n\n` +
@@ -1036,7 +1038,9 @@ export default function StudentProfile({
             {/* Print Transcript container */}
             <div id="transcript-container" className="p-6 overflow-y-auto space-y-6 text-white font-sans">
               <div className="text-center space-y-1.5 border-b border-slate-800 pb-5">
-                <span className="text-[10px] font-mono text-indigo-400 uppercase tracking-widest">{tutorProfile.instituteName}</span>
+                {tutorProfile.instituteName && (
+                  <span className="text-[10px] font-mono text-indigo-400 uppercase tracking-widest">{tutorProfile.instituteName}</span>
+                )}
                 <h4 className="text-lg font-bold tracking-tight text-white">Student Academic Transcript</h4>
                 <p className="text-xs text-slate-450 font-mono">Date Compiled: June 8, 2026</p>
               </div>
@@ -1105,7 +1109,7 @@ export default function StudentProfile({
             <div className="p-5.5 border-t border-slate-800 flex flex-wrap gap-2 justify-end bg-slate-850/50">
               <button
                 onClick={() => {
-                  window.print();
+                  printTranscript(student, tutorProfile, metrics, studentPerformance);
                 }}
                 className="inline-flex items-center gap-1.5 px-4 py-2 bg-slate-800 hover:bg-slate-750 text-slate-300 rounded-lg text-xs font-semibold cursor-pointer"
               >
@@ -1117,7 +1121,7 @@ export default function StudentProfile({
                   // Build a copyable summary text for WhatsApp
                   const copyText = `*ACADEMIC REPORT CARD*\n` +
                     `*Student*: ${student.name} (${student.grade})\n` +
-                    `*Institute*: ${tutorProfile.instituteName}\n` +
+                    (tutorProfile.instituteName ? `*Institute*: ${tutorProfile.instituteName}\n` : '') +
                     `*Tutor*: ${tutorProfile.name}\n` +
                     `---------------------------\n` +
                     `• Attendance percentage: *${metrics.attendancePercentage}%*\n` +

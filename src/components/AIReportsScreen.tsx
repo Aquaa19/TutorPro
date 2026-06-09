@@ -120,6 +120,9 @@ export default function AIReportsScreen({
       ? studentInfo.tests.map(t => `- ${t.testName} (${t.date}): Obtained ${t.marksObtained}/${t.totalMarks} marks. Remarks: ${t.remarks || 'None'}`).join('\n')
       : "No test records registered yet.";
 
+    const currentDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+    const reportingPeriod = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long' });
+
     const promptText = `You are a professional private tutor writing a student progress dossier for a parent. Write a highly structured, analytical, yet encouraging and professional progress report for the following student:
 Student Name: ${studentInfo.student.name}
 Grade/Class: ${studentInfo.student.grade}
@@ -130,6 +133,8 @@ Total Tests Taken: ${studentInfo.totalTests}
 
 Tutor Name: ${tutorProfile.name}
 ${tutorProfile.instituteName ? `Academy/Institute: ${tutorProfile.instituteName}` : ''}
+Current Date: ${currentDate}
+Reporting Period: ${reportingPeriod}
 
 Recent Exam / Test Logs:
 ${testScoresFormatted}
@@ -141,9 +146,10 @@ Please write the dossier in beautiful, clear markdown, and structured under thes
 4. Tailored Study Recommendations (practical steps for parent and student)
 5. Future Academic Projection (trend analysis)
 
-Important Persona Instructions:
+Important Persona & Formatting Instructions:
 - You are the educator/tutor, ${tutorProfile.name}.
 - Refer to yourself or sign off using the name "${tutorProfile.name}" ${tutorProfile.instituteName ? `of "${tutorProfile.instituteName}"` : ''} where appropriate.
+- If you include any metadata/header block at the beginning, you MUST use the actual Current Date "${currentDate}" and Reporting Period "${reportingPeriod}" provided above. Do not output placeholders like "[Specify Reporting Period]", "[Current Date]", or similar.
 - Absolutely DO NOT use generic placeholders like "[Tutor Name]", "[Educator Name]", "[Your Name]", or "[Academy Name]" anywhere in your response. Replace all placeholders with actual name details.
 - At the end of the dossier, you do not need to write a full signature/line block (since one will be rendered dynamically by the system), but if you include a sign-off or closing remark, write it under the name "${tutorProfile.name}".
 

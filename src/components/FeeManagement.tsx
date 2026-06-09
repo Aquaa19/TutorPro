@@ -177,14 +177,14 @@ export default function FeeManagement({
       : `${billingDay}th`;
 
     const text = `*FEE DUE REMINDER*\n` +
-      `*Institute*: ${tutorProfile.instituteName}\n` +
+      (tutorProfile.instituteName ? `*Institute*: ${tutorProfile.instituteName}\n` : '') +
       `---------------------------\n` +
       `Dear Parent,\n` +
       `This is a gentle reminder that the tuition fee for *${student.name}* for the month of *${selectedMonth}* is overdue. \n\n` +
       `• *Monthly Tuition Rate*: ₹${student.monthlyFee}\n` +
       `• *Outstanding Balance*: *₹${outstandingAmount}*\n` +
       `• *Days Overdue*: ${days} days (Due Date: ${suffix} of month)\n\n` +
-      `Kindly complete the outstanding payment of *₹${outstandingAmount}* using UPI ID: *${tutorProfile.upiId}* or via cash as soon as possible.\n\n` +
+      `Kindly complete the outstanding payment of *₹${outstandingAmount}* ${tutorProfile.upiId ? `using UPI ID: *${tutorProfile.upiId}* or via cash` : 'via cash or online transfer'} as soon as possible.\n\n` +
       `If you have already paid, please ignore this or send a screenshot of the receipt.\n\n` +
       `Thank you!\n${tutorProfile.name}`;
       
@@ -541,7 +541,7 @@ export default function FeeManagement({
                               onClick={() => {
                                 const text = `*TUITION FEE RECEIPT*\n` +
                                   `---------------------------\n` +
-                                  `*Institute*: ${tutorProfile.instituteName}\n` +
+                                  (tutorProfile.instituteName ? `*Institute*: ${tutorProfile.instituteName}\n` : '') +
                                   `*Tutor*: ${tutorProfile.name} (${tutorProfile.phone})\n` +
                                   `*Date*: ${item.payment?.date}\n` +
                                   `*Receipt ID*: #${item.payment?.id.slice(0, 8)}\n\n` +

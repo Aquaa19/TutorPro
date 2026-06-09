@@ -278,7 +278,7 @@ export function printAIDossier(
           
           <div class="header">
             <div class="institute-info">
-              <h1>${tutor.instituteName || 'TutorPro OS'}</h1>
+              <h1>${tutor.instituteName || 'Private Tutoring'}</h1>
               <p><strong>Educator:</strong> ${tutor.name}</p>
               ${tutor.phone ? `<p><strong>Phone:</strong> ${tutor.phone}</p>` : ''}
               ${tutor.email ? `<p><strong>Email:</strong> ${tutor.email}</p>` : ''}
@@ -391,8 +391,6 @@ export function printAIDossier(
   iframe.style.top = '-9999px';
   iframe.style.width = '1024px';
   iframe.style.height = '768px';
-  iframe.style.opacity = '0';
-  iframe.style.pointerEvents = 'none';
   iframe.style.border = '0';
   document.body.appendChild(iframe);
 

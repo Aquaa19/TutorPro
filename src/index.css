@@ -63,34 +63,6 @@
   to { opacity: 1; transform: scale(1); }
 }
 
-/* Print Overrides for Printable Report Cards */
-@media print {
-  body {
-    background: white !important;
-    color: black !important;
-  }
-  aside, header, main > *:not(#transcript-container) {
-    display: none !important;
-  }
-  #transcript-container {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100% !important;
-    background: white !important;
-    color: black !important;
-    padding: 0 !important;
-  }
-  #transcript-container * {
-    color: black !important;
-    border-color: #e2e8f0 !important;
-  }
-  #transcript-container .bg-slate-850, 
-  #transcript-container .bg-slate-850\/50, 
-  #transcript-container .bg-slate-850\/30 {
-    background-color: #f8fafc !important;
-  }
-}
 
 /* Light mode overrides */
 .light {

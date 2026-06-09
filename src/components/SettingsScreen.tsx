@@ -21,9 +21,21 @@ export default function SettingsScreen({
   const [name, setName] = useState(tutorProfile.name);
   const [email, setEmail] = useState(tutorProfile.email);
   const [phone, setPhone] = useState(tutorProfile.phone);
-  const [upiId, setUpiId] = useState(tutorProfile.upiId);
-  const [instituteName, setInstituteName] = useState(tutorProfile.instituteName);
-  const [defaultFee, setDefaultFee] = useState(tutorProfile.defaultFee.toString());
+  const [upiId, setUpiId] = useState(tutorProfile.upiId || '');
+  const [instituteName, setInstituteName] = useState(tutorProfile.instituteName || '');
+  const [defaultFee, setDefaultFee] = useState(tutorProfile.defaultFee?.toString() || '0');
+  const [signatureText, setSignatureText] = useState(tutorProfile.signatureText || tutorProfile.name);
+  
+  React.useEffect(() => {
+    // Dynamically inject Google Font for typed signature live preview
+    const link = document.createElement('link');
+    link.href = 'https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap';
+    link.rel = 'stylesheet';
+    document.head.appendChild(link);
+    return () => {
+      document.head.removeChild(link);
+    };
+  }, []);
   
   // Feedback states
   const [profileSuccess, setProfileSuccess] = useState(false);
@@ -40,10 +52,11 @@ export default function SettingsScreen({
       name,
       email,
       phone,
-      upiId: "",
-      instituteName: "",
-      defaultFee: 0,
-      subjects: ["Mathematics", "Physics", "Chemistry", "Biology", "Computer", "Mathematics & Computer"]
+      upiId: tutorProfile.upiId || "",
+      instituteName: instituteName || "",
+      defaultFee: tutorProfile.defaultFee || 0,
+      subjects: tutorProfile.subjects || ["Mathematics", "Physics", "Chemistry", "Biology", "Computer", "Mathematics & Computer"],
+      signatureText: signatureText || name
     });
 
     setProfileSuccess(true);
@@ -160,6 +173,45 @@ export default function SettingsScreen({
                     className="w-full px-3.5 py-2 text-xs bg-white/5 border border-white/5 focus:border-gold rounded-lg text-white font-mono outline-none transition-all"
                     required
                   />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-xs text-slate-400 font-mono">Academy / Institute Name (Optional)</label>
+                <input
+                  type="text"
+                  value={instituteName}
+                  onChange={e => setInstituteName(e.target.value)}
+                  placeholder="e.g. Kumar Classes / Private Tutorial Hub (Optional)"
+                  className="w-full px-3.5 py-2.5 text-xs bg-white/5 border border-white/5 focus:border-gold rounded-lg text-white font-sans outline-none transition-all"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="block text-xs text-slate-400 font-mono">Typed Signature Text *</label>
+                  <input
+                    type="text"
+                    value={signatureText}
+                    onChange={e => setSignatureText(e.target.value)}
+                    placeholder="Name as you want it signed"
+                    className="w-full px-3.5 py-2.5 text-xs bg-white/5 border border-white/5 focus:border-gold rounded-lg text-white font-sans outline-none transition-all"
+                    required
+                  />
+                  <span className="text-[9px] text-slate-500 block">This custom text is displayed on student report cards and PDF invoices.</span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs text-slate-400 font-mono">Signature Render Preview</label>
+                  <div className="h-16 w-full bg-[#121318] border border-white/5 rounded-xl flex items-center justify-center overflow-hidden relative group">
+                    <span className="absolute inset-0 bg-gold/5 blur-md opacity-30 group-hover:opacity-50 transition-opacity"></span>
+                    <span 
+                      className="text-2xl text-gold tracking-wider select-none relative z-10"
+                      style={{ fontFamily: "'Dancing Script', cursive" }}
+                    >
+                      {signatureText || name}
+                    </span>
+                  </div>
                 </div>
               </div>
 
