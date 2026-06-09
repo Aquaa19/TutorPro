@@ -33,7 +33,7 @@ export default function FeeManagement({
 
   // Bulk reminders state
   const [isBulkPanelOpen, setIsBulkPanelOpen] = useState(false);
-  const [bulkQueue, setBulkQueue] = useState<Array<{ student: Student; daysLate: number; status: 'queued' | 'sent' | 'skipped'; checked: boolean }>>([]);
+  const [bulkQueue, setBulkQueue] = useState<Array<{ student: Student; daysLate: number; outstandingAmount: number; status: 'queued' | 'sent' | 'skipped'; checked: boolean }>>([]);
   const [currentQueueIndex, setCurrentQueueIndex] = useState(0);
 
   const handleOpenBulkReminders = () => {
@@ -42,6 +42,7 @@ export default function FeeManagement({
       .map(item => ({
         student: item.student,
         daysLate: item.daysLate,
+        outstandingAmount: item.outstandingAmount,
         status: 'queued' as const,
         checked: true
       }));
@@ -79,8 +80,23 @@ export default function FeeManagement({
     const today = new Date('2026-06-08T11:03:15Z');
     
     return activeStudents.map(student => {
-      const matchPayment = payments.find(p => p.studentId === student.id && p.monthFor === selectedMonth && p.status === 'paid');
-      const isPaid = !!matchPayment;
+      const studentMonthPayments = payments.filter(p => p.studentId === student.id && p.monthFor === selectedMonth && p.status === 'paid');
+      const totalPaid = studentMonthPayments.reduce((sum, p) => sum + p.amountPaid, 0);
+      const isPaid = totalPaid >= student.monthlyFee;
+      
+      let paymentStatus: 'paid' | 'half_paid' | 'partially_paid' | 'unpaid' = 'unpaid';
+      if (totalPaid <= 0) {
+        paymentStatus = 'unpaid';
+      } else if (totalPaid >= student.monthlyFee) {
+        paymentStatus = 'paid';
+      } else if (totalPaid === student.monthlyFee / 2) {
+        paymentStatus = 'half_paid';
+      } else {
+        paymentStatus = 'partially_paid';
+      }
+
+      const outstandingAmount = Math.max(0, student.monthlyFee - totalPaid);
+      const latestPayment = studentMonthPayments.sort((a,b) => b.date.localeCompare(a.date))[0];
       
       // Calculate days late:
       // Deadline is now the custom billing start day of the selected month
@@ -100,7 +116,10 @@ export default function FeeManagement({
       return {
         student,
         isPaid,
-        payment: matchPayment,
+        paymentStatus,
+        totalPaid,
+        outstandingAmount,
+        payment: latestPayment,
         daysLate,
       };
     }).filter(item => {
@@ -146,7 +165,7 @@ export default function FeeManagement({
   };
 
   // WhatsApp reminder helpers
-  const triggerOverdueWhatsApp = (student: Student, days: number) => {
+  const triggerOverdueWhatsApp = (student: Student, days: number, outstandingAmount: number) => {
     const formattedPhone = student.parentPhone.replace(/[^0-9+]/g, '');
     const billingDay = student.billingDay || 1;
     const suffix = billingDay === 1 || billingDay === 21 || billingDay === 31 
@@ -161,10 +180,13 @@ export default function FeeManagement({
       `*Institute*: ${tutorProfile.instituteName}\n` +
       `---------------------------\n` +
       `Dear Parent,\n` +
-      `This is a gentle reminder that the tuition fee of *₹${student.monthlyFee}* for *${student.name}* for the month of *${selectedMonth}* is overdue by *${days} days* (Due Date: ${suffix} of month).\n\n` +
-      `Kindly complete the payment using UPI ID: *${tutorProfile.upiId}* or via cash as soon as possible.\n\n` +
+      `This is a gentle reminder that the tuition fee for *${student.name}* for the month of *${selectedMonth}* is overdue. \n\n` +
+      `• *Monthly Tuition Rate*: ₹${student.monthlyFee}\n` +
+      `• *Outstanding Balance*: *₹${outstandingAmount}*\n` +
+      `• *Days Overdue*: ${days} days (Due Date: ${suffix} of month)\n\n` +
+      `Kindly complete the outstanding payment of *₹${outstandingAmount}* using UPI ID: *${tutorProfile.upiId}* or via cash as soon as possible.\n\n` +
       `If you have already paid, please ignore this or send a screenshot of the receipt.\n\n` +
-      `Thank you!\nProf. Rajesh Kumar`;
+      `Thank you!\n${tutorProfile.name}`;
       
     const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
@@ -427,8 +449,12 @@ export default function FeeManagement({
                 <div
                   key={item.student.id}
                   className={`bg-dark-card border p-6 rounded-2xl shadow-xl flex flex-col justify-between gap-4 transition-all hover:-translate-y-0.5 ${
-                    item.isPaid 
+                    item.paymentStatus === 'paid'
                       ? 'border-emerald-500/10 bg-gradient-to-br from-dark-card to-emerald-500/[0.02] hover:border-emerald-500/20' 
+                      : item.paymentStatus === 'half_paid'
+                      ? 'border-amber-500/10 bg-gradient-to-br from-dark-card to-amber-500/[0.02] hover:border-amber-500/20'
+                      : item.paymentStatus === 'partially_paid'
+                      ? 'border-yellow-500/10 bg-gradient-to-br from-dark-card to-yellow-500/[0.02] hover:border-yellow-500/20'
                       : 'border-white/5 bg-gradient-to-br from-dark-card to-rose-500/[0.01] hover:border-white/10'
                   }`}
                 >
@@ -437,11 +463,21 @@ export default function FeeManagement({
                       <div className="flex items-center gap-2">
                         <h4 className="text-base font-serif italic text-white">{item.student.name}</h4>
                         <span className={`inline-block px-1.5 py-0.5 rounded text-[8px] font-mono font-bold border uppercase tracking-wider ${
-                          item.isPaid 
+                          item.paymentStatus === 'paid'
                             ? 'bg-emerald-500/10 text-emerald-450 border-emerald-500/20' 
+                            : item.paymentStatus === 'half_paid'
+                            ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                            : item.paymentStatus === 'partially_paid'
+                            ? 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
                             : 'bg-rose-500/10 text-rose-400 border-rose-500/20'
                         }`}>
-                          {item.isPaid ? 'PAID' : 'PENDING'}
+                          {item.paymentStatus === 'paid'
+                            ? 'PAID'
+                            : item.paymentStatus === 'half_paid'
+                            ? 'HALF PAID'
+                            : item.paymentStatus === 'partially_paid'
+                            ? 'PARTIAL PAID'
+                            : 'PENDING'}
                         </span>
                       </div>
                       <p className="text-xs text-slate-400">{item.student.grade} • {item.student.subject}</p>
@@ -456,15 +492,22 @@ export default function FeeManagement({
 
                   <div className="flex items-center justify-between border-t border-white/5 pt-4 flex-wrap gap-2">
                     <div>
-                      {item.isPaid ? (
+                      {item.paymentStatus === 'paid' ? (
                         <div className="flex items-center gap-1 text-[10px] text-emerald-400 font-mono font-bold uppercase tracking-wider">
                           <CheckCircle className="w-3.5 h-3.5" />
                           Logged: {item.payment?.date}
                         </div>
                       ) : (
-                        <div className="flex items-center gap-1.5 text-[10px] text-rose-400 font-mono font-bold uppercase tracking-wider">
-                          <AlertTriangle className="w-3.5 h-3.5 animate-pulse" />
-                          Overdue: <strong className="text-white text-xs font-semibold">{item.daysLate} days</strong>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5 text-[10px] text-rose-400 font-mono font-bold uppercase tracking-wider">
+                            <AlertTriangle className="w-3.5 h-3.5 animate-pulse" />
+                            Dues: <strong className="text-white text-xs font-semibold">₹{item.outstandingAmount}</strong> ({item.daysLate} days late)
+                          </div>
+                          {item.totalPaid > 0 && (
+                            <div className="text-[9px] text-slate-400 font-mono">
+                              Paid so far: ₹{item.totalPaid}
+                            </div>
+                          )}
                         </div>
                       )}
                     </div>
@@ -473,7 +516,7 @@ export default function FeeManagement({
                       {!item.isPaid ? (
                         <>
                           <button
-                            onClick={() => triggerOverdueWhatsApp(item.student, item.daysLate)}
+                            onClick={() => triggerOverdueWhatsApp(item.student, item.daysLate, item.outstandingAmount)}
                             className="p-2.5 bg-rose-500/10 border border-rose-500/20 text-rose-450 hover:bg-rose-500 hover:text-white rounded-lg transition-colors cursor-pointer"
                             title="Dispatch WhatsApp Alert"
                           >
@@ -635,7 +678,7 @@ export default function FeeManagement({
                             <button
                               onClick={() => {
                                 // Launch WhatsApp
-                                triggerOverdueWhatsApp(activeItem.student, activeItem.daysLate);
+                                triggerOverdueWhatsApp(activeItem.student, activeItem.daysLate, activeItem.outstandingAmount);
                                 setBulkQueue(prev => prev.map((q, idx) => idx === activeIndex ? { ...q, status: 'sent' } : q));
                                 setCurrentQueueIndex(activeIndex + 1);
                               }}

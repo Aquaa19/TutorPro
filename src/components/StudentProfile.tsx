@@ -157,9 +157,17 @@ export default function StudentProfile({
       : 100;
 
     // Fees due calculation
-    const monthsPaid = studentPayments.filter(p => p.status === 'paid').map(p => p.monthFor);
-    const hasJunePaid = monthsPaid.includes('June 2026');
-    const hasMayPaid = monthsPaid.includes('May 2026');
+    const getMonthPaymentStatus = (month: string) => {
+      const monthPayments = studentPayments.filter(p => p.monthFor === month && p.status === 'paid');
+      const totalPaid = monthPayments.reduce((sum, p) => sum + p.amountPaid, 0);
+      if (totalPaid <= 0) return { status: 'unpaid', totalPaid, outstanding: student.monthlyFee };
+      if (totalPaid >= student.monthlyFee) return { status: 'paid', totalPaid, outstanding: 0 };
+      if (totalPaid === student.monthlyFee / 2) return { status: 'half_paid', totalPaid, outstanding: student.monthlyFee / 2 };
+      return { status: 'partially_paid', totalPaid, outstanding: Math.max(0, student.monthlyFee - totalPaid) };
+    };
+
+    const junePaymentInfo = getMonthPaymentStatus('June 2026');
+    const mayPaymentInfo = getMonthPaymentStatus('May 2026');
 
     // Performance averages
     const averageScoreRate = studentPerformance.length > 0
@@ -174,11 +182,11 @@ export default function StudentProfile({
       lates,
       absents,
       attendancePercentage,
-      hasJunePaid,
-      hasMayPaid,
+      junePaymentInfo,
+      mayPaymentInfo,
       averageScoreRate,
     };
-  }, [studentAtt, studentPayments, studentPerformance]);
+  }, [studentAtt, studentPayments, studentPerformance, student.monthlyFee]);
 
   const handleCreateTestScore = (e: React.FormEvent) => {
     e.preventDefault();
@@ -225,9 +233,17 @@ export default function StudentProfile({
     window.open(url, '_blank');
   };
 
-  const whatsAppOverview = `Hello! This is Prof. Rajesh Kumar. Here is a quick academic update for *${student.name}*:\n\n` +
+  const whatsAppOverview = `Hello! This is ${tutorProfile.name}. Here is a quick academic update for *${student.name}*:\n\n` +
     `• *Attendance*: ${metrics.attendancePercentage}% (${metrics.presents + metrics.lates}/${metrics.totalSessions} sessions)\n` +
-    `• *Fee Status for June*: ${metrics.hasJunePaid ? 'Paid' : 'Pending'}\n` +
+    `• *Fee Status for June*: ${
+      metrics.junePaymentInfo.status === 'paid'
+        ? 'Fully Paid'
+        : metrics.junePaymentInfo.status === 'half_paid'
+        ? `Half Paid (₹${metrics.junePaymentInfo.outstanding} outstanding)`
+        : metrics.junePaymentInfo.status === 'partially_paid'
+        ? `Partially Paid (₹${metrics.junePaymentInfo.outstanding} outstanding)`
+        : `Pending (₹${student.monthlyFee} unpaid)`
+    }\n` +
     `• *Latest Test Performance*: ${studentPerformance.length > 0 ? `${studentPerformance[studentPerformance.length - 1].testName}: ${studentPerformance[studentPerformance.length - 1].marksObtained}/${studentPerformance[studentPerformance.length - 1].totalMarks}` : 'N/A'}\n\n` +
     `Thank you for your continued support! Let me know if you have any questions.`;
 
@@ -529,16 +545,32 @@ export default function StudentProfile({
               </div>
             </div>
 
-            {/* Current Fee status */}
+             {/* Current Fee status */}
             <div className="bg-dark-card border border-white/5 p-6 rounded-3xl shadow-xl space-y-2">
               <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">June 2026 Collection Status</span>
               <div>
-                {metrics.hasJunePaid ? (
+                {metrics.junePaymentInfo.status === 'paid' ? (
                   <div className="space-y-1">
                     <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold mt-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> PAID recepient
                     </span>
                     <p className="text-[10px] text-slate-450 mt-1">Receipt logged on {studentPayments.find(p=>p.monthFor==='June 2026')?.date}</p>
+                  </div>
+                ) : metrics.junePaymentInfo.status === 'half_paid' ? (
+                  <div className="space-y-1">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold mt-1">
+                      <AlertCircle className="w-3.5 h-3.5" /> HALF PAID
+                    </span>
+                    <p className="text-xs text-slate-400 mt-1">Dues of <strong className="text-white">₹{metrics.junePaymentInfo.outstanding}</strong> are outstanding</p>
+                    <p className="text-[10px] text-slate-450 mt-1">Paid so far: ₹{metrics.junePaymentInfo.totalPaid}</p>
+                  </div>
+                ) : metrics.junePaymentInfo.status === 'partially_paid' ? (
+                  <div className="space-y-1">
+                    <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-xs font-bold mt-1">
+                      <AlertCircle className="w-3.5 h-3.5" /> PARTIALLY PAID
+                    </span>
+                    <p className="text-xs text-slate-400 mt-1">Dues of <strong className="text-white">₹{metrics.junePaymentInfo.outstanding}</strong> are outstanding</p>
+                    <p className="text-[10px] text-slate-450 mt-1">Paid so far: ₹{metrics.junePaymentInfo.totalPaid}</p>
                   </div>
                 ) : (
                   <div className="space-y-1">
@@ -781,8 +813,18 @@ export default function StudentProfile({
                         <td className="px-5 py-3.5 text-slate-400">{p.date}</td>
                         <td className="px-5 py-3.5 font-mono text-slate-450">{p.mode}</td>
                         <td className="px-5 py-3.5">
-                          <span className="inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-emerald-500/10 text-emerald-450 border border-emerald-500/20 uppercase">
-                            {p.status}
+                          <span className={`inline-block px-2 py-0.5 rounded text-[9px] font-mono font-bold border uppercase ${
+                            p.amountPaid >= student.monthlyFee
+                              ? 'bg-emerald-500/10 text-emerald-450 border-emerald-500/20'
+                              : p.amountPaid === student.monthlyFee / 2
+                              ? 'bg-amber-500/10 text-amber-400 border-amber-500/20'
+                              : 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20'
+                          }`}>
+                            {p.amountPaid >= student.monthlyFee
+                              ? 'Fully Paid'
+                              : p.amountPaid === student.monthlyFee / 2
+                              ? 'Half Paid'
+                              : 'Partially Paid'}
                           </span>
                         </td>
                         <td className="px-5 py-3.5 text-right">

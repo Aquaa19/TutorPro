@@ -4,6 +4,18 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
   const receiptId = payment.id.slice(0, 8).toUpperCase();
   const docTitle = `${student.name.replace(/\s+/g, '_')}_${payment.date}`;
 
+  const badgeText = payment.amountPaid >= student.monthlyFee 
+    ? 'PAID' 
+    : payment.amountPaid === student.monthlyFee / 2 
+    ? 'HALF PAID' 
+    : 'PARTIALLY PAID';
+
+  const badgeStyle = payment.amountPaid >= student.monthlyFee
+    ? 'background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0;'
+    : payment.amountPaid === student.monthlyFee / 2
+    ? 'background: #fef3c7; color: #b45309; border: 1px solid #fde68a;'
+    : 'background: #fef9c3; color: #a16207; border: 1px solid #fef08a;';
+
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -136,9 +148,7 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
             border-top: 2px solid #f1f5f9;
           }
           .payment-status-badge {
-            background: #dcfce7;
-            color: #15803d;
-            border: 1px solid #bbf7d0;
+            ${badgeStyle}
             padding: 8px 16px;
             border-radius: 9999px;
             font-size: 12px;
@@ -283,7 +293,7 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
           
           <div class="footer-section">
             <div>
-              <div class="payment-status-badge">PAID</div>
+              <div class="payment-status-badge">${badgeText}</div>
             </div>
             <div class="signature-area">
               <div class="signature-name">${tutor.signatureText || tutor.name || 'Arkadyuti Mandal'}</div>
