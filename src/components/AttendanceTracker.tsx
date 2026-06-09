@@ -9,6 +9,7 @@ interface AttendanceTrackerProps {
   attendance: Attendance[];
   onSaveAttendance: (attendances: Omit<Attendance, 'id'>[]) => void;
   preselectedBatchId?: string;
+  tutorProfile?: any;
 }
 
 export default function AttendanceTracker({
@@ -17,6 +18,7 @@ export default function AttendanceTracker({
   attendance,
   onSaveAttendance,
   preselectedBatchId,
+  tutorProfile,
 }: AttendanceTrackerProps) {
   const [filterMode, setFilterMode] = useState<'day-wise' | 'manual'>('day-wise');
   const [manualSubMode, setManualSubMode] = useState<'batch' | 'student'>('batch');
@@ -218,14 +220,14 @@ export default function AttendanceTracker({
   // WhatsApp helper absentees dispatch
   const notifyAbsent = (student: Student) => {
     const formattedPhone = student.parentPhone.replace(/[^0-9+]/g, '');
-    const text = `Dear Parent,\n\nPlease note that *${student.name}* was marked *ABSENT* for our scheduled class on *${selectedDate}*.\n\nKindly check or let me know if there was a scheduling conflict.\n\nBest Regards,\nProf. Rajesh Kumar`;
+    const text = `Dear Parent,\n\nPlease note that *${student.name}* was marked *ABSENT* for our scheduled class on *${selectedDate}*.\n\nKindly check or let me know if there was a scheduling conflict.\n\nBest Regards,\n${tutorProfile?.name || 'Your Educator'}`;
     const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };
 
   const notifyLate = (student: Student) => {
     const formattedPhone = student.parentPhone.replace(/[^0-9+]/g, '');
-    const text = `Dear Parent,\n\nPlease note that *${student.name}* arrived *LATE* for our scheduled class on *${selectedDate}*.\n\nWe encourage timely attendance to avoid missing core lecture chapters.\n\nBest Regards,\nProf. Rajesh Kumar`;
+    const text = `Dear Parent,\n\nPlease note that *${student.name}* arrived *LATE* for our scheduled class on *${selectedDate}*.\n\nWe encourage timely attendance to avoid missing core lecture chapters.\n\nBest Regards,\n${tutorProfile?.name || 'Your Educator'}`;
     const url = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(text)}`;
     window.open(url, '_blank');
   };

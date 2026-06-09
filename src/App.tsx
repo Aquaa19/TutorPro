@@ -674,6 +674,7 @@ export default function App() {
             attendance={attendance}
             onSaveAttendance={handleSaveAttendance}
             preselectedBatchId={nav.extraState?.preselectedBatchId}
+            tutorProfile={tutorProfile}
           />
         )}
 
