@@ -36,7 +36,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colorScheme.background
                 ) {
                     WebViewScreen(
-                        url = "https://tutor-manager-aquaaxs-projects.vercel.app?webview=true",
+                        url = "https://tutor-manager-liard.vercel.app?webview=true",
                         modifier = Modifier
                             .fillMaxSize()
                             .statusBarsPadding()
@@ -146,7 +146,7 @@ fun WebViewScreen(url: String, modifier: Modifier = Modifier) {
                                     printManager.print(title, printAdapter, android.print.PrintAttributes.Builder().build())
                                 }
                             }
-                            tempWebView.loadDataWithBaseURL("https://tutor-manager-aquaaxs-projects.vercel.app/", html, "text/html", "UTF-8", null)
+                            tempWebView.loadDataWithBaseURL("https://tutor-manager-liard.vercel.app/", html, "text/html", "UTF-8", null)
                         }
                     }
                 }, "AndroidApp")

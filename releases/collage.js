@@ -401,7 +401,7 @@ function renderLightboxContent() {
               <span class="browser-dot yellow"></span>
               <span class="browser-dot green"></span>
             </div>
-            <div class="browser-address">https://tutorpro.app/portal/${item.title.toLowerCase().replace(/ /g, "-")}</div>
+            <div class="browser-address">https://tutor-manager-liard.vercel.app/portal/${item.title.toLowerCase().replace(/ /g, "-")}</div>
           </div>
           <div class="browser-content">
             <img src="${item.desktopImg}" alt="${item.title} Desktop View">

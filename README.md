@@ -34,7 +34,7 @@
       <span style="width: 8px; height: 8px; border-radius: 50%; background: #27c93f; display: inline-block;"></span>
     </div>
     <div style="flex-grow: 1; max-width: 320px; height: 20px; background: #1e293b; border-radius: 4px; margin-left: 14px; font-size: 10px; color: #64748b; display: flex; align-items: center; padding: 0 10px; font-family: monospace; letter-spacing: 0.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-      https://tutorpro.app/portal/dashboard
+      https://tutor-manager-liard.vercel.app/portal/dashboard
     </div>
   </div>
   
