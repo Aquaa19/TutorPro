@@ -337,7 +337,11 @@
           <!-- Dynamically generates QR code targeting this download page -->
           <img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&color=0b0f19&data=https://tutor-manager-liard.vercel.app/download.html" alt="QR Code Link" width="140" height="140" />
         </div>
-        <p class="qr-text">Scan this QR code with your mobile device to open this download page directly.</p>
+        <p class="qr-text" style="margin-bottom: 12px;">Scan this QR code with your mobile device to open this download page directly.</p>
+        <button onclick="downloadQRCode()" class="btn btn-secondary" style="padding: 10px 18px; font-size: 12px; height: auto; display: inline-flex; align-items: center; gap: 6px; width: auto;">
+          <i data-lucide="download"></i>
+          <span>Save QR Code Image</span>
+        </button>
       </div>
     </div>
 
@@ -381,6 +385,25 @@
   <script>
     // Initialize Lucide icons
     lucide.createIcons();
+
+    async function downloadQRCode() {
+      const qrUrl = "https://api.qrserver.com/v1/create-qr-code/?size=500x500&color=0b0f19&data=https://tutor-manager-liard.vercel.app/download.html";
+      try {
+        const response = await fetch(qrUrl);
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'TutorPro_Download_QR.png';
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      } catch (error) {
+        window.open(qrUrl, '_blank');
+      }
+    }
   </script>
 </body>
 </html>
