@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../utils/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { TutorProfile } from '../types';
-import { GraduationCap, ShieldCheck, CheckSquare, Sparkles, User, Landmark, Phone, BookOpen, DollarSign, FileSignature } from 'lucide-react';
+import { GraduationCap, ShieldCheck, CheckSquare, Sparkles, User, Landmark, Phone, BookOpen, IndianRupee, FileSignature } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface OnboardingScreenProps {
@@ -87,7 +87,7 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
       title: "Your Virtual Command Center",
       subtitle: "Educator Workspace Overview",
       description: "TutorPro.OS organizes your active cohorts, student profiles, and ledger balances into a unified, responsive dashboard. Mark daily attendance with one tap, track schedules, and maintain complete digital student rosters.",
-      icon: <GraduationCap className="w-10 h-10 text-gold" />,
+      icon: <GraduationCap className="w-10 h-10 text-dark-bg" />,
       colorClass: "from-gold to-amber-500 shadow-gold/15",
       badge: "Dashboard"
     },
@@ -95,7 +95,7 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
       title: "AI-Powered Progress Reports",
       subtitle: "Google Gemini AI Integrations",
       description: "Connect your Gemini API Key to automatically generate student progress cards. The integrated AI models analyze test histories and attendance rates to instantly draft structured growth reviews and study forecasts.",
-      icon: <Sparkles className="w-10 h-10 text-cyan-400" />,
+      icon: <Sparkles className="w-10 h-10 text-dark-bg" />,
       colorClass: "from-cyan-500 to-indigo-500 shadow-cyan-500/15",
       badge: "Gemini AI"
     },
@@ -103,7 +103,7 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
       title: "Finances & WhatsApp Alerts",
       subtitle: "Ledger Accounting & Parent Communications",
       description: "Maintain payment logs, receive fee alerts, and compile PDF invoices. When students are late or absent, direct-route customized attendance notifications straight to their parents via a native WhatsApp chat bridge.",
-      icon: <DollarSign className="w-10 h-10 text-emerald-400" />,
+      icon: <IndianRupee className="w-10 h-10 text-dark-bg" />,
       colorClass: "from-emerald-500 to-teal-500 shadow-emerald-500/15",
       badge: "Communications"
     }
