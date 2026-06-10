@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { auth, db } from '../utils/firebase';
+import { db } from '../utils/firebase';
 import { doc, setDoc } from 'firebase/firestore';
 import { TutorProfile } from '../types';
-import { GraduationCap, ShieldCheck, CheckSquare, Sparkles, User, Landmark, Phone, BookOpen, DollarSign, Wallet, FileSignature } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { GraduationCap, ShieldCheck, CheckSquare, Sparkles, User, Landmark, Phone, BookOpen, DollarSign, FileSignature } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface OnboardingScreenProps {
   currentUser: any;
@@ -23,6 +23,10 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Welcome Tour State
+  const [showTour, setShowTour] = useState(false);
+  const [tourSlide, setTourSlide] = useState(0);
+
   // Prefill signature text when name changes initially
   useEffect(() => {
     if (!onboardingProfile.signatureText && name) {
@@ -30,9 +34,7 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
     }
   }, [name, onboardingProfile.signatureText]);
 
-
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmitForm = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim() || !signatureText.trim()) {
       setError('Please fill in all required profile fields.');
@@ -42,7 +44,12 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
       setError('You must accept the Terms of Service & Privacy Policy to proceed.');
       return;
     }
+    setError(null);
+    setShowTour(true);
+    setTourSlide(0);
+  };
 
+  const handleCompleteOnboarding = async () => {
     setLoading(true);
     setError(null);
 
@@ -69,10 +76,149 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
     } catch (err: any) {
       console.error("Onboarding submission error:", err);
       setError(err.message || 'Failed to save profile. Please try again.');
+      setShowTour(false); // Return to form so they can fix issues if save fails
     } finally {
       setLoading(false);
     }
   };
+
+  const slides = [
+    {
+      title: "Your Virtual Command Center",
+      subtitle: "Educator Workspace Overview",
+      description: "TutorPro.OS organizes your active cohorts, student profiles, and ledger balances into a unified, responsive dashboard. Mark daily attendance with one tap, track schedules, and maintain complete digital student rosters.",
+      icon: <GraduationCap className="w-10 h-10 text-gold" />,
+      colorClass: "from-gold to-amber-500 shadow-gold/15",
+      badge: "Dashboard"
+    },
+    {
+      title: "AI-Powered Progress Reports",
+      subtitle: "Google Gemini AI Integrations",
+      description: "Connect your Gemini API Key to automatically generate student progress cards. The integrated AI models analyze test histories and attendance rates to instantly draft structured growth reviews and study forecasts.",
+      icon: <Sparkles className="w-10 h-10 text-cyan-400" />,
+      colorClass: "from-cyan-500 to-indigo-500 shadow-cyan-500/15",
+      badge: "Gemini AI"
+    },
+    {
+      title: "Finances & WhatsApp Alerts",
+      subtitle: "Ledger Accounting & Parent Communications",
+      description: "Maintain payment logs, receive fee alerts, and compile PDF invoices. When students are late or absent, direct-route customized attendance notifications straight to their parents via a native WhatsApp chat bridge.",
+      icon: <DollarSign className="w-10 h-10 text-emerald-400" />,
+      colorClass: "from-emerald-500 to-teal-500 shadow-emerald-500/15",
+      badge: "Communications"
+    }
+  ];
+
+  const currentSlideData = slides[tourSlide];
+
+  if (showTour) {
+    return (
+      <div className="min-h-screen bg-dark-bg text-gray-200 font-sans flex items-center justify-center py-12 px-4 overflow-y-auto antialiased">
+        <div className="absolute inset-x-0 top-0 h-96 bg-gold/5 blur-3xl pointer-events-none -z-10"></div>
+        
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-xl bg-dark-sidebar border border-white/5 rounded-3xl p-8 shadow-2xl relative text-center flex flex-col items-center min-h-[480px] justify-between"
+        >
+          <div className="w-full">
+            {/* Top Header */}
+            <div className="flex justify-between items-center w-full mb-8 border-b border-white/5 pb-4">
+              <span className="text-[10px] font-mono text-slate-500 uppercase tracking-widest">TutorPro.OS Tour</span>
+              <span className="text-xs font-mono font-bold text-gold">0{tourSlide + 1} / 03</span>
+            </div>
+
+            {/* Animated Slide Content */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={tourSlide}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.25 }}
+                className="flex flex-col items-center space-y-6"
+              >
+                {/* Glowing Icon */}
+                <div className={`w-20 h-20 rounded-2xl bg-gradient-to-tr ${currentSlideData.colorClass} flex items-center justify-center shadow-lg relative group overflow-hidden`}>
+                  <span className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></span>
+                  {currentSlideData.icon}
+                </div>
+
+                {/* Typography */}
+                <div className="space-y-2">
+                  <span className="text-[10px] font-mono uppercase tracking-widest text-gold bg-gold/10 px-3 py-1 rounded-full">{currentSlideData.badge}</span>
+                  <h2 className="text-xl md:text-2xl font-serif italic text-white tracking-wide mt-2">{currentSlideData.title}</h2>
+                  <p className="text-xs text-slate-450 font-mono uppercase tracking-wider">{currentSlideData.subtitle}</p>
+                </div>
+
+                {/* Description */}
+                <p className="text-xs md:text-sm text-slate-400 leading-relaxed max-w-md">
+                  {currentSlideData.description}
+                </p>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+
+          {/* Action Controls & Dots */}
+          <div className="w-full mt-8 pt-6 border-t border-white/5 flex flex-col items-center gap-6">
+            {/* Indicators Dots */}
+            <div className="flex gap-2">
+              {slides.map((_, idx) => (
+                <span
+                  key={idx}
+                  className={`h-1.5 rounded-full transition-all duration-300 ${idx === tourSlide ? 'w-6 bg-gold' : 'w-1.5 bg-white/20'}`}
+                ></span>
+              ))}
+            </div>
+
+            {/* Buttons Row */}
+            <div className="flex justify-between items-center w-full">
+              <button
+                onClick={() => {
+                  if (tourSlide > 0) {
+                    setTourSlide(tourSlide - 1);
+                  } else {
+                    setShowTour(false); // Return to form
+                  }
+                }}
+                className="text-xs font-mono text-slate-500 hover:text-white transition-colors cursor-pointer outline-none"
+              >
+                {tourSlide > 0 ? "← Back" : "← Edit Profile"}
+              </button>
+
+              {tourSlide < 2 ? (
+                <button
+                  onClick={() => setTourSlide(tourSlide + 1)}
+                  className="px-6 py-2.5 bg-white/5 hover:bg-white/10 text-white font-semibold text-xs rounded-xl border border-white/5 transition-all flex items-center gap-1.5 cursor-pointer outline-none"
+                >
+                  <span>Next</span>
+                  <span className="text-[10px]">→</span>
+                </button>
+              ) : (
+                <button
+                  onClick={handleCompleteOnboarding}
+                  disabled={loading}
+                  className="px-8 py-3 bg-gradient-to-r from-gold to-amber-500 hover:from-amber-500 hover:to-gold text-dark-bg font-bold uppercase tracking-widest text-[10px] rounded-xl shadow-[0_0_15px_rgba(212,175,55,0.2)] disabled:opacity-50 disabled:pointer-events-none transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2 cursor-pointer outline-none"
+                >
+                  {loading ? (
+                    <>
+                      <div className="w-3.5 h-3.5 border-2 border-dark-bg border-t-transparent rounded-full animate-spin"></div>
+                      <span>Launching...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="w-3.5 h-3.5 text-dark-bg animate-pulse" />
+                      <span>Launch TutorPro.OS</span>
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-dark-bg text-gray-200 font-sans flex items-center justify-center py-12 px-4 overflow-y-auto antialiased">
@@ -105,11 +251,11 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmitForm} className="space-y-6">
           
           {/* Section 1: Profile Details */}
           <div className="space-y-4">
-            <h3 className="text-xs font-mono uppercase tracking-widest text-slate-450 border-b border-white/5 pb-2 font-bold">1. Academy & Identity</h3>
+            <h3 className="text-xs font-mono uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2 font-bold">1. Academy & Identity</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-1">
@@ -157,7 +303,7 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
 
           {/* Section 2: Teaching & Payments */}
           <div className="space-y-4 pt-2">
-            <h3 className="text-xs font-mono uppercase tracking-widest text-slate-450 border-b border-white/5 pb-2 font-bold">2. Tuition Configurations</h3>
+            <h3 className="text-xs font-mono uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2 font-bold">2. Tuition Configurations</h3>
             
             <div className="space-y-1">
               <label className="text-[10px] font-mono text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
@@ -172,12 +318,11 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
               />
               <span className="text-[9px] text-slate-500 block">Separating subjects with commas makes them selectable tags when adding new batches.</span>
             </div>
-
           </div>
 
           {/* Section 3: Typed Signature */}
           <div className="space-y-4 pt-2">
-            <h3 className="text-xs font-mono uppercase tracking-widest text-slate-450 border-b border-white/5 pb-2 font-bold">3. Invoice Signature</h3>
+            <h3 className="text-xs font-mono uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2 font-bold">3. Invoice Signature</h3>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
               <div className="space-y-1">
@@ -215,7 +360,7 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
             <button
               type="button"
               onClick={() => setAgreeTerms(!agreeTerms)}
-              className="mt-0.5 shrink-0 text-slate-450 hover:text-white cursor-pointer select-none transition-colors"
+              className="mt-0.5 shrink-0 text-slate-500 hover:text-white cursor-pointer select-none transition-colors"
             >
               {agreeTerms ? (
                 <CheckSquare className="w-4 h-4 text-gold" />
@@ -235,17 +380,8 @@ export default function OnboardingScreen({ currentUser, onboardingProfile, onCom
               disabled={loading || !agreeTerms}
               className="px-8 py-3 bg-gradient-to-r from-gold to-amber-500 hover:from-amber-500 hover:to-gold text-dark-bg font-bold uppercase tracking-widest text-[10px] rounded-xl shadow-[0_0_15px_rgba(212,175,55,0.15)] disabled:opacity-50 disabled:pointer-events-none cursor-pointer transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center gap-2"
             >
-              {loading ? (
-                <>
-                  <div className="w-3.5 h-3.5 border-2 border-dark-bg border-t-transparent rounded-full animate-spin"></div>
-                  <span>Saving...</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-3.5 h-3.5 text-dark-bg" />
-                  <span>Complete Onboarding</span>
-                </>
-              )}
+              <Sparkles className="w-3.5 h-3.5 text-dark-bg" />
+              <span>Complete Onboarding</span>
             </button>
           </div>
 
