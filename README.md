@@ -21,7 +21,13 @@
 
 ## 🎨 Interactive Gallery
 
-<p align="center"><em>Scroll horizontally directly <strong>inside</strong> the browser and phone mockups below to cycle through the platform's interfaces.</em></p>
+<div align="center" style="margin-bottom: 20px;">
+  <a href="https://tutor-manager-liard.vercel.app/collage.html" target="_blank" rel="noopener noreferrer">
+    <img src="https://img.shields.io/badge/Launch%20Interactive%20Showcase-Open%20Live%20Demo-6366f1?style=for-the-badge&logo=vercel&logoColor=white" alt="Launch Interactive Showcase" />
+  </a>
+</div>
+
+<p align="center"><em>Scroll horizontally directly <strong>inside</strong> the browser and phone mockups below to cycle through the platform's interfaces, or click the badge above to view the fully-interactive showcase.</em></p>
 
 ### 🖥️ Desktop Administration Console
 
