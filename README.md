@@ -526,8 +526,14 @@ TutorPro.OS is equipped with a native Android WebView wrapper application.
 * **DOM Storage**: Supports local storage fallback if network sync is unavailable.
 
 ### 📥 Downloading the Mobile App
-You can download the compiled installer package directly from the repository's release files:
-* **Debug APK**: **[`releases/tutorpro-debug.apk`](./releases/tutorpro-debug.apk)**
+
+You can view the official download page with installation instructions and scan a QR code here:
+👉 **[TutorPro.OS Mobile App Download Page](https://tutor-manager-liard.vercel.app/download.html)**
+
+Alternatively, download the compiled installer packages directly from the official GitHub Releases:
+* **Release APK**: **[tutorpro.apk](https://github.com/Aquaa19/TutorPro/releases/download/v1.0.0/tutorpro.apk)** (v1.0.0, 8.3 MB)
+* **Debug APK**: **[tutorpro-debug.apk](https://github.com/Aquaa19/TutorPro/releases/download/v1.0.0/tutorpro-debug.apk)** (v1.0.0, 12.2 MB)
+* **View Releases page**: **[GitHub Releases Page](https://github.com/Aquaa19/TutorPro/releases/tag/v1.0.0)**
 
 ---
 
