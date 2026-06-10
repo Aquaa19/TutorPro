@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <!-- SEO Tags -->
+  <title>TutorPro.OS - Interactive Design Showcase</title>
+  <meta name="description" content="Explore the beautiful, responsive user interfaces of TutorPro.OS. View desktop and mobile screenshots inside static browser and phone mockups with smooth drag scroll.">
+  <meta name="author" content="TutorPro Software Systems">
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="collage.css">
+</head>
+<body>
+
+  <!-- Header Section -->
+  <header>
+    <span class="badge">Interactive Showcase</span>
+    <h1>TutorPro.OS Showcase</h1>
+    <p>Scroll or drag horizontally directly <strong>inside</strong> the mock screens below to cycle through the platform's interfaces.</p>
+  </header>
+
+  <!-- Side-by-Side Mockup Showcase Wrapper -->
+  <main class="showcase-wrapper">
+
+    <!-- 1. Desktop Showcase Card -->
+    <section class="showcase-card desktop-showcase" aria-labelledby="desktop-header-title">
+      <div class="showcase-title-row">
+        <i data-lucide="monitor"></i>
+        <h2 id="desktop-header-title" class="showcase-device-title">Desktop Administration Console</h2>
+      </div>
+
+      <!-- Single browser frame with internal scrolling track -->
+      <div class="device-frame-browser" style="position: relative;">
+        <div class="browser-bar">
+          <div class="browser-dots">
+            <span class="browser-dot red"></span>
+            <span class="browser-dot yellow"></span>
+            <span class="browser-dot green"></span>
+          </div>
+          <div class="browser-address">https://tutorpro.app/portal/dashboard</div>
+        </div>
+        
+        <!-- Viewport content (scrolling happens here) -->
+        <div class="browser-content" id="browser-viewport" tabIndex="0" aria-label="Desktop screen viewport">
+          <div class="browser-track" id="browser-track">
+            <!-- Slides rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Floating Navigation Arrows -->
+        <button class="carousel-arrow float-arrow prev" id="desktop-prev" title="Previous screen" aria-label="Previous desktop screenshot">
+          <i data-lucide="chevron-left"></i>
+        </button>
+        <button class="carousel-arrow float-arrow next" id="desktop-next" title="Next screen" aria-label="Next desktop screenshot">
+          <i data-lucide="chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Dynamic Info Panel for active desktop screenshot -->
+      <div class="showcase-info-panel" id="desktop-info-panel">
+        <div class="showcase-meta-row">
+          <span class="card-tag tag-desktop">Desktop Portal</span>
+          <span class="card-index">Module #01</span>
+        </div>
+        <h3 class="card-title">Loading...</h3>
+        <p class="card-desc">Loading screen information details...</p>
+      </div>
+
+      <!-- Carousel bottom control bar -->
+      <div class="showcase-controls-row" style="justify-content: center;">
+        <div class="carousel-indicators" id="desktop-dots" aria-label="Desktop slide indicators">
+          <!-- Dots rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Mobile Showcase Card -->
+    <section class="showcase-card mobile-showcase" aria-labelledby="mobile-header-title">
+      <div class="showcase-title-row">
+        <i data-lucide="smartphone"></i>
+        <h2 id="mobile-header-title" class="showcase-device-title">Mobile Admin App</h2>
+      </div>
+
+      <!-- Single mobile frame with internal scrolling track -->
+      <div class="device-frame-phone" style="position: relative;">
+        <div class="phone-notch"></div>
+        
+        <!-- Viewport content (scrolling happens here) -->
+        <div class="phone-content" id="phone-viewport" tabIndex="0" aria-label="Mobile screen viewport">
+          <div class="phone-track" id="phone-track">
+            <!-- Slides rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Floating Navigation Arrows -->
+        <button class="carousel-arrow float-arrow prev" id="mobile-prev" title="Previous screen" aria-label="Previous mobile screenshot">
+          <i data-lucide="chevron-left"></i>
+        </button>
+        <button class="carousel-arrow float-arrow next" id="mobile-next" title="Next screen" aria-label="Next mobile screenshot">
+          <i data-lucide="chevron-right"></i>
+        </button>
+      </div>
+
+      <!-- Dynamic Info Panel for active mobile screenshot -->
+      <div class="showcase-info-panel" id="mobile-info-panel">
+        <div class="showcase-meta-row">
+          <span class="card-tag tag-mobile">Mobile App</span>
+          <span class="card-index">Module #01</span>
+        </div>
+        <h3 class="card-title">Loading...</h3>
+        <p class="card-desc">Loading screen information details...</p>
+      </div>
+
+      <!-- Carousel bottom control bar -->
+      <div class="showcase-controls-row" style="justify-content: center;">
+        <div class="carousel-indicators" id="mobile-dots" aria-label="Mobile slide indicators">
+          <!-- Dots rendered dynamically -->
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Lightbox Modal -->
+  <div id="lightbox" class="lightbox" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="lightbox-title">
+    <div class="lightbox-header">
+      <div class="lightbox-title-container">
+        <h2 id="lightbox-title" class="lightbox-title">Screen Title</h2>
+        <p id="lightbox-subtitle" class="lightbox-subtitle">Screen Description</p>
+      </div>
+      <div class="lightbox-controls">
+        <button class="lightbox-btn lightbox-close" id="lightbox-close" title="Close modal (Esc)" aria-label="Close modal">
+          <i data-lucide="x"></i>
+        </button>
+      </div>
+    </div>
+    
+    <div class="lightbox-body" id="lightbox-body">
+      <!-- Lightbox content (Browser/Phone mockup) inserted dynamically -->
+    </div>
+    
+    <!-- Lightbox Navigation Arrows -->
+    <button class="lightbox-nav-arrow prev" id="lightbox-prev" title="Previous screen (Left Arrow)" aria-label="Previous screenshot">
+      <i data-lucide="chevron-left"></i>
+    </button>
+    <button class="lightbox-nav-arrow next" id="lightbox-next" title="Next screen (Right Arrow)" aria-label="Next screenshot">
+      <i data-lucide="chevron-right"></i>
+    </button>
+    
+    <div class="lightbox-footer" id="lightbox-footer">
+      <!-- Paging index status indicator -->
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p>&copy; 2026 TutorPro.OS. Built with premium custom CSS and internal scrolling mockups. Powered by <a href="#" target="_blank" rel="noopener noreferrer">Antigravity Design Engine</a>.</p>
+  </footer>
+
+  <!-- Lucide Icon Pack CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Main Collage Logic Script -->
+  <script src="collage.js"></script>
+</body>
+</html>
