@@ -35,12 +35,20 @@ export default function Dashboard({
   }, [batches, todayDay]);
 
   const currentMonthLabel = useMemo(() => {
-    const options: Intl.DateTimeFormatOptions = { month: 'long', year: 'numeric' };
-    return new Date().toLocaleDateString('en-US', options); // e.g. "June 2026"
+    const MONTH_NAMES = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    const date = new Date();
+    return `${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
   }, []);
 
   const currentMonthName = useMemo(() => {
-    return new Date().toLocaleDateString('en-US', { month: 'long' });
+    const MONTH_NAMES = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    return MONTH_NAMES[new Date().getMonth()];
   }, []);
 
   const formattedTodayDate = useMemo(() => {

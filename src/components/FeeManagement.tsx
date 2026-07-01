@@ -3,6 +3,26 @@ import { IndianRupee, AlertTriangle, CheckCircle, Clock, Search, Filter, Share2,
 import { Student, Batch, Payment, TutorProfile } from '../types';
 import { printInvoice } from '../utils/printInvoice';
 
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+const getCurrentMonthString = (): string => {
+  const date = new Date();
+  return `${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
+};
+
+const getMonthOptions = (): string[] => {
+  const options = [];
+  const currentDate = new Date();
+  for (let i = -12; i <= 2; i++) {
+    const d = new Date(currentDate.getFullYear(), currentDate.getMonth() + i, 1);
+    options.push(`${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`);
+  }
+  return options.reverse();
+};
+
 interface FeeManagementProps {
   students: Student[];
   batches: Batch[];
@@ -20,7 +40,7 @@ export default function FeeManagement({
   onRecordPayment,
   openLogPaymentDirectly = false,
 }: FeeManagementProps) {
-  const [selectedMonth, setSelectedMonth] = useState('June 2026');
+  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonthString());
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'paid' | 'overdue'>('all');
   
@@ -76,8 +96,7 @@ export default function FeeManagement({
     const activeStudents = students.filter(s => s.status === 'active');
     
     // Custom deadline simulation: 1st of each month
-    // Today is June 8, 2026.
-    const today = new Date('2026-06-08T11:03:15Z');
+    const today = new Date();
     
     return activeStudents.map(student => {
       const studentMonthPayments = payments.filter(p => p.studentId === student.id && p.monthFor === selectedMonth && p.status === 'paid');
@@ -222,9 +241,11 @@ export default function FeeManagement({
               onChange={e => setSelectedMonth(e.target.value)}
               className="bg-transparent text-xs text-white outline-none border-none pr-1.5 cursor-pointer font-sans"
             >
-              <option value="June 2026" className="bg-[#121318]">June 2026 (Current)</option>
-              <option value="May 2026" className="bg-[#121318]">May 2026</option>
-              <option value="April 2026" className="bg-[#121318]">April 2026</option>
+              {getMonthOptions().map(m => (
+                <option key={m} value={m} className="bg-[#121318]">
+                  {m} {m === getCurrentMonthString() ? '(Current)' : ''}
+                </option>
+              ))}
             </select>
           </div>
         </div>
@@ -302,9 +323,11 @@ export default function FeeManagement({
                     className="w-full px-3.5 py-2.5 text-xs bg-white/[0.01] border border-white/10 hover:bg-white/[0.03] rounded-xl text-white outline-none cursor-pointer"
                     required
                   >
-                    <option value="June 2026" className="bg-[#121318]">June 2026</option>
-                    <option value="May 2026" className="bg-[#121318]">May 2026</option>
-                    <option value="April 2026" className="bg-[#121318]">April 2026</option>
+                    {getMonthOptions().map(m => (
+                      <option key={m} value={m} className="bg-[#121318]">
+                        {m}
+                      </option>
+                    ))}
                   </select>
                 </div>
 

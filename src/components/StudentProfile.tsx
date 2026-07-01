@@ -6,6 +6,32 @@ import { Student, Batch, Attendance, Payment, Performance, TutorProfile } from '
 import { printInvoice } from '../utils/printInvoice';
 import { printTranscript } from '../utils/printTranscript';
 
+const MONTH_NAMES = [
+  "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December"
+];
+
+const getCurrentMonthString = (): string => {
+  const date = new Date();
+  return `${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
+};
+
+const getPreviousMonthString = (): string => {
+  const date = new Date();
+  date.setMonth(date.getMonth() - 1);
+  return `${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
+};
+
+const getMonthOptions = (): string[] => {
+  const options = [];
+  const currentDate = new Date();
+  for (let i = -12; i <= 2; i++) {
+    const d = new Date(currentDate.getFullYear(), currentDate.getMonth() + i, 1);
+    options.push(`${MONTH_NAMES[d.getMonth()]} ${d.getFullYear()}`);
+  }
+  return options.reverse();
+};
+
 interface StudentProfileProps {
   studentId: string;
   students: Student[];
@@ -53,7 +79,7 @@ export default function StudentProfile({
 
   // New Payment state
   const [payAmount, setPayAmount] = useState('');
-  const [payMonth, setPayMonth] = useState('June 2026');
+  const [payMonth, setPayMonth] = useState(getCurrentMonthString());
   const [payMode, setPayMode] = useState<'Cash' | 'UPI' | 'Bank Transfer'>('UPI');
   const [payDate, setPayDate] = useState(new Date().toISOString().split('T')[0]);
 
@@ -167,8 +193,11 @@ export default function StudentProfile({
       return { status: 'partially_paid', totalPaid, outstanding: Math.max(0, student.monthlyFee - totalPaid) };
     };
 
-    const junePaymentInfo = getMonthPaymentStatus('June 2026');
-    const mayPaymentInfo = getMonthPaymentStatus('May 2026');
+    const currentMonthStr = getCurrentMonthString();
+    const previousMonthStr = getPreviousMonthString();
+
+    const currentMonthPaymentInfo = getMonthPaymentStatus(currentMonthStr);
+    const previousMonthPaymentInfo = getMonthPaymentStatus(previousMonthStr);
 
     // Performance averages
     const averageScoreRate = studentPerformance.length > 0
@@ -183,10 +212,10 @@ export default function StudentProfile({
       lates,
       absents,
       attendancePercentage,
-      junePaymentInfo,
-      mayPaymentInfo,
+      currentMonthPaymentInfo,
+      previousMonthPaymentInfo,
       averageScoreRate,
-      hasJunePaid: junePaymentInfo.status === 'paid',
+      hasCurrentMonthPaid: currentMonthPaymentInfo.status === 'paid',
     };
   }, [studentAtt, studentPayments, studentPerformance, student.monthlyFee]);
 
@@ -237,13 +266,13 @@ export default function StudentProfile({
 
   const whatsAppOverview = `Hello! This is ${tutorProfile.name}. Here is a quick academic update for *${student.name}*:\n\n` +
     `• *Attendance*: ${metrics.attendancePercentage}% (${metrics.presents + metrics.lates}/${metrics.totalSessions} sessions)\n` +
-    `• *Fee Status for June*: ${
-      metrics.junePaymentInfo.status === 'paid'
+    `• *Fee Status for ${getCurrentMonthString()}*: ${
+      metrics.currentMonthPaymentInfo.status === 'paid'
         ? 'Fully Paid'
-        : metrics.junePaymentInfo.status === 'half_paid'
-        ? `Half Paid (₹${metrics.junePaymentInfo.outstanding} outstanding)`
-        : metrics.junePaymentInfo.status === 'partially_paid'
-        ? `Partially Paid (₹${metrics.junePaymentInfo.outstanding} outstanding)`
+        : metrics.currentMonthPaymentInfo.status === 'half_paid'
+        ? `Half Paid (₹${metrics.currentMonthPaymentInfo.outstanding} outstanding)`
+        : metrics.currentMonthPaymentInfo.status === 'partially_paid'
+        ? `Partially Paid (₹${metrics.currentMonthPaymentInfo.outstanding} outstanding)`
         : `Pending (₹${student.monthlyFee} unpaid)`
     }\n` +
     `• *Latest Test Performance*: ${studentPerformance.length > 0 ? `${studentPerformance[studentPerformance.length - 1].testName}: ${studentPerformance[studentPerformance.length - 1].marksObtained}/${studentPerformance[studentPerformance.length - 1].totalMarks}` : 'N/A'}\n\n` +
@@ -549,30 +578,30 @@ export default function StudentProfile({
 
              {/* Current Fee status */}
             <div className="bg-dark-card border border-white/5 p-6 rounded-3xl shadow-xl space-y-2">
-              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">June 2026 Collection Status</span>
+              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">{getCurrentMonthString()} Collection Status</span>
               <div>
-                {metrics.junePaymentInfo.status === 'paid' ? (
+                {metrics.currentMonthPaymentInfo.status === 'paid' ? (
                   <div className="space-y-1">
                     <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-xs font-bold mt-1">
                       <CheckCircle2 className="w-3.5 h-3.5" /> PAID recepient
                     </span>
-                    <p className="text-[10px] text-slate-450 mt-1">Receipt logged on {studentPayments.find(p=>p.monthFor==='June 2026')?.date}</p>
+                    <p className="text-[10px] text-slate-450 mt-1">Receipt logged on {studentPayments.find(p=>p.monthFor===getCurrentMonthString())?.date}</p>
                   </div>
-                ) : metrics.junePaymentInfo.status === 'half_paid' ? (
+                ) : metrics.currentMonthPaymentInfo.status === 'half_paid' ? (
                   <div className="space-y-1">
                     <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-bold mt-1">
                       <AlertCircle className="w-3.5 h-3.5" /> HALF PAID
                     </span>
-                    <p className="text-xs text-slate-400 mt-1">Dues of <strong className="text-white">₹{metrics.junePaymentInfo.outstanding}</strong> are outstanding</p>
-                    <p className="text-[10px] text-slate-450 mt-1">Paid so far: ₹{metrics.junePaymentInfo.totalPaid}</p>
+                    <p className="text-xs text-slate-400 mt-1">Dues of <strong className="text-white">₹{metrics.currentMonthPaymentInfo.outstanding}</strong> are outstanding</p>
+                    <p className="text-[10px] text-slate-450 mt-1">Paid so far: ₹{metrics.currentMonthPaymentInfo.totalPaid}</p>
                   </div>
-                ) : metrics.junePaymentInfo.status === 'partially_paid' ? (
+                ) : metrics.currentMonthPaymentInfo.status === 'partially_paid' ? (
                   <div className="space-y-1">
                     <span className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-yellow-500/10 text-yellow-400 border border-yellow-500/20 text-xs font-bold mt-1">
                       <AlertCircle className="w-3.5 h-3.5" /> PARTIALLY PAID
                     </span>
-                    <p className="text-xs text-slate-400 mt-1">Dues of <strong className="text-white">₹{metrics.junePaymentInfo.outstanding}</strong> are outstanding</p>
-                    <p className="text-[10px] text-slate-450 mt-1">Paid so far: ₹{metrics.junePaymentInfo.totalPaid}</p>
+                    <p className="text-xs text-slate-400 mt-1">Dues of <strong className="text-white">₹{metrics.currentMonthPaymentInfo.outstanding}</strong> are outstanding</p>
+                    <p className="text-[10px] text-slate-450 mt-1">Paid so far: ₹{metrics.currentMonthPaymentInfo.totalPaid}</p>
                   </div>
                 ) : (
                   <div className="space-y-1">
@@ -737,10 +766,9 @@ export default function StudentProfile({
                     onChange={e => setPayMonth(e.target.value)}
                     className="w-full px-3 py-1.5 text-xs bg-slate-900 border border-slate-750 focus:border-emerald-500 rounded-lg text-white outline-none cursor-pointer"
                   >
-                    <option value="June 2026">June 2026</option>
-                    <option value="May 2026">May 2026</option>
-                    <option value="April 2026">April 2026</option>
-                    <option value="March 2026">March 2026</option>
+                    {getMonthOptions().map(m => (
+                      <option key={m} value={m}>{m}</option>
+                    ))}
                   </select>
                 </div>
                 <div>
@@ -1075,8 +1103,8 @@ export default function StudentProfile({
                 </div>
                 <div className="p-3 bg-slate-850/30 rounded-lg">
                   <p className="text-[9px] font-mono text-slate-500 uppercase">Fee dues status</p>
-                  <p className={`text-sm font-extrabold mt-2.5 font-mono ${metrics.hasJunePaid ? 'text-emerald-400' : 'text-amber-500'}`}>
-                    {metrics.hasJunePaid ? 'PAID & CLEAR' : 'DUES PENDING'}
+                  <p className={`text-sm font-extrabold mt-2.5 font-mono ${metrics.hasCurrentMonthPaid ? 'text-emerald-400' : 'text-amber-500'}`}>
+                    {metrics.hasCurrentMonthPaid ? 'PAID & CLEAR' : 'DUES PENDING'}
                   </p>
                 </div>
               </div>
@@ -1125,10 +1153,10 @@ export default function StudentProfile({
                     `*Tutor*: ${tutorProfile.name}\n` +
                     `---------------------------\n` +
                     `• Attendance percentage: *${metrics.attendancePercentage}%*\n` +
-                    `• Fee Ledger accounts: *${metrics.hasJunePaid ? 'Paid & clear' : 'June dues pending'}*\n` +
+                    `• Fee Ledger accounts: *${metrics.hasCurrentMonthPaid ? 'Paid & clear' : `${getCurrentMonthString()} dues pending`}*\n` +
                     `• Cumulative Academic score: *${metrics.averageScoreRate !== null ? `${metrics.averageScoreRate}%` : 'N/A'}*\n` +
                     `---------------------------\n` +
-                    `_Generated on June 8, 2026. Apex Systems._`;
+                    `_Generated on ${new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}. Apex Systems._`;
                     
                   sendWhatsAppUpdate(copyText);
                 }}

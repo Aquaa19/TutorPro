@@ -313,19 +313,6 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
             const isIframe = window.self !== window.top;
             if (isIframe) {
               document.documentElement.classList.add('is-iframe');
-              const originalTitle = window.parent.document.title;
-              window.parent.document.title = "${student.name.replace(/\s+/g, '_').replace(/\\/g, '\\\\').replace(/"/g, '\\"')}_${payment.date}";
-              
-              window.focus();
-              window.print();
-              
-              const cleanup = function() {
-                window.parent.document.title = originalTitle;
-                try {
-                  window.parent.document.body.removeChild(window.frameElement);
-                } catch (e) {}
-              };
-              window.onafterprint = cleanup;
             } else {
               window.focus();
               try {
@@ -368,6 +355,28 @@ export function printInvoice(student: Student, payment: Payment, tutor: TutorPro
   iframe.style.height = '768px';
   iframe.style.border = '0';
   document.body.appendChild(iframe);
+
+  iframe.onload = () => {
+    if (!iframe.contentWindow) return;
+    const originalTitle = document.title;
+    document.title = docTitle;
+
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+
+    const cleanup = () => {
+      document.title = originalTitle;
+      try {
+        document.body.removeChild(iframe);
+      } catch (e) {}
+    };
+
+    if ('onafterprint' in iframe.contentWindow) {
+      iframe.contentWindow.onafterprint = cleanup;
+    } else {
+      setTimeout(cleanup, 500);
+    }
+  };
 
   const doc = iframe.contentWindow?.document || iframe.contentDocument;
   if (!doc) return;

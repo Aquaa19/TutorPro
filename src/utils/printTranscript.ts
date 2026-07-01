@@ -8,24 +8,31 @@ export function printTranscript(
     presents: number;
     attendancePercentage: number;
     averageScoreRate: number | null;
-    junePaymentInfo: { status: string; totalPaid: number; outstanding: number };
+    currentMonthPaymentInfo: { status: string; totalPaid: number; outstanding: number };
   },
   studentPerformance: Performance[]
 ) {
+  const MONTH_NAMES = [
+    "January", "February", "March", "April", "May", "June",
+    "July", "August", "September", "October", "November", "December"
+  ];
+  const date = new Date();
+  const currentMonthStr = `${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
+
   const printDate = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   const docTitle = `${student.name.replace(/\s+/g, '_')}_Academic_Transcript`;
 
-  const feeStatusText = metrics.junePaymentInfo.status === 'paid' 
+  const feeStatusText = metrics.currentMonthPaymentInfo.status === 'paid' 
     ? 'PAID & CLEAR' 
-    : metrics.junePaymentInfo.status === 'half_paid'
+    : metrics.currentMonthPaymentInfo.status === 'half_paid'
     ? 'HALF PAID'
-    : metrics.junePaymentInfo.status === 'partially_paid'
+    : metrics.currentMonthPaymentInfo.status === 'partially_paid'
     ? 'PARTIALLY PAID'
     : 'DUES PENDING';
 
-  const feeStatusColor = metrics.junePaymentInfo.status === 'paid'
+  const feeStatusColor = metrics.currentMonthPaymentInfo.status === 'paid'
     ? '#166534' // green-800 / emerald dark
-    : metrics.junePaymentInfo.status === 'half_paid'
+    : metrics.currentMonthPaymentInfo.status === 'half_paid'
     ? '#b45309' // amber-700
     : '#b91c1c'; // red-700
 
@@ -328,7 +335,7 @@ export function printTranscript(
               <div class="metric-val" style="font-size: 13px; font-weight: 700; color: ${feeStatusColor}; line-height: 2.2;">
                 ${feeStatusText}
               </div>
-              <div class="metric-sub">June 2026 cycle</div>
+              <div class="metric-sub">${currentMonthStr} cycle</div>
             </div>
           </div>
           
@@ -373,19 +380,7 @@ export function printTranscript(
           window.onload = function() {
             const isIframe = window.self !== window.top;
             if (isIframe) {
-              const originalTitle = window.parent.document.title;
-              window.parent.document.title = "${student.name.replace(/\s+/g, '_').replace(/\\/g, '\\\\').replace(/"/g, '\\"')}_Academic_Transcript";
-              
-              window.focus();
-              window.print();
-              
-              const cleanup = function() {
-                window.parent.document.title = originalTitle;
-                try {
-                  window.parent.document.body.removeChild(window.frameElement);
-                } catch (e) {}
-              };
-              window.onafterprint = cleanup;
+              document.documentElement.classList.add('is-iframe');
             } else {
               window.focus();
               try {
@@ -409,6 +404,28 @@ export function printTranscript(
   iframe.style.height = '768px';
   iframe.style.border = '0';
   document.body.appendChild(iframe);
+
+  iframe.onload = () => {
+    if (!iframe.contentWindow) return;
+    const originalTitle = document.title;
+    document.title = docTitle;
+
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+
+    const cleanup = () => {
+      document.title = originalTitle;
+      try {
+        document.body.removeChild(iframe);
+      } catch (e) {}
+    };
+
+    if ('onafterprint' in iframe.contentWindow) {
+      iframe.contentWindow.onafterprint = cleanup;
+    } else {
+      setTimeout(cleanup, 500);
+    }
+  };
 
   const doc = iframe.contentWindow?.document || iframe.contentDocument;
   if (!doc) return;
