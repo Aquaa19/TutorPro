@@ -1070,7 +1070,7 @@ export default function StudentProfile({
                   <span className="text-[10px] font-mono text-indigo-400 uppercase tracking-widest">{tutorProfile.instituteName}</span>
                 )}
                 <h4 className="text-lg font-bold tracking-tight text-white">Student Academic Transcript</h4>
-                <p className="text-xs text-slate-450 font-mono">Date Compiled: June 8, 2026</p>
+                <p className="text-xs text-slate-450 font-mono">Date Compiled: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}</p>
               </div>
 
               {/* Student and tutor details */}
