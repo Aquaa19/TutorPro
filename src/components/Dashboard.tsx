@@ -61,11 +61,11 @@ export default function Dashboard({
     const activeStudents = students.filter(s => s.status === 'active');
     
     // Fee calculations for current month
-    const expectedJuneRevenue = activeStudents.reduce((sum, s) => sum + s.monthlyFee, 0);
-    const collectedJuneRevenue = payments
+    const expectedMonthRevenue = activeStudents.reduce((sum, s) => sum + s.monthlyFee, 0);
+    const collectedMonthRevenue = payments
       .filter(p => p.monthFor === currentMonthLabel && p.status === 'paid')
       .reduce((sum, p) => sum + p.amountPaid, 0);
-    const outstandingJuneRevenue = expectedJuneRevenue - collectedJuneRevenue;
+    const outstandingMonthRevenue = expectedMonthRevenue - collectedMonthRevenue;
 
     // Consecutively low attendance: calculate for all currently active students
     // Threshold < 75%
@@ -91,9 +91,9 @@ export default function Dashboard({
 
     return {
       totalActiveStudents: activeStudents.length,
-      expectedJuneRevenue,
-      collectedJuneRevenue,
-      outstandingJuneRevenue,
+      expectedMonthRevenue,
+      collectedMonthRevenue,
+      outstandingMonthRevenue,
       lowAttendanceList,
       pendingStudents,
     };
@@ -142,9 +142,9 @@ export default function Dashboard({
         <div className="bg-dark-card border border-white/5 p-6 rounded-3xl flex items-center justify-between shadow-xl">
           <div>
             <p className="text-[10px] opacity-40 uppercase tracking-widest mb-1">{currentMonthName} Collections</p>
-            <h3 className="text-2xl font-serif italic font-medium text-emerald-400">₹{stats.collectedJuneRevenue}</h3>
+            <h3 className="text-2xl font-serif italic font-medium text-emerald-400">₹{stats.collectedMonthRevenue}</h3>
             <p className="text-[10px] text-slate-400 mt-1 uppercase tracking-wider">
-              Outstanding: <strong className="text-white">₹{stats.outstandingJuneRevenue}</strong>
+              Outstanding: <strong className="text-white">₹{stats.outstandingMonthRevenue}</strong>
             </p>
           </div>
           <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20">

@@ -413,7 +413,7 @@ export default function FeeManagement({
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            Dues Pending
+            Dues Pending ({studentsFeeStatusList.filter(item => !item.isPaid).length})
           </button>
           <button
             onClick={() => setStatusFilter('paid')}
@@ -423,7 +423,7 @@ export default function FeeManagement({
                 : 'text-slate-400 hover:text-white'
             }`}
           >
-            June Paid
+            {selectedMonth.split(' ')[0]} Paid ({studentsFeeStatusList.filter(item => item.isPaid).length})
           </button>
         </div>
 
